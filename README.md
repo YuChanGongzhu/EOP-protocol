@@ -1,29 +1,30 @@
-# Injective NFC钱包系统
+# EOP Protocol (Ethereum of Passkey)
 
-基于NFC卡片的Injective钱包管理系统。当用户首次将NFC卡片贴近设备时，系统会自动生成Injective钱包并关联NFC UID，用户可以设置个性化的.inj域名作为身份标识。
+EOP (Ethereum of Passkey) 是一个开创性的去中心化身份验证协议，旨在将 Web2 的无缝用户体验与 Web3 的强大安全性相结合。通过利用 Passkey 技术（如 Face ID, Touch ID），EOP 允许用户在任何 EVM 兼容的区块链上，无需助记词或密码，即可轻松创建和管理钱包。
+
+本项目是 EOP 协议的一个参考实现，展示了如何通过 NFC 卡片作为物理世界的“钥匙”，来触发和管理链上资产，为物理世界和数字世界的交互提供了全新的范式。EOP 协议具有高度的可移植性，可以轻松部署到任何 EVM 兼容链上，如 Ethereum, Polygon, Arbitrum 等。
 
 ## 技术栈
 
 - **后端框架**: NestJS + TypeScript
 - **数据库**: PostgreSQL + Prisma ORM
-- **区块链**: Injective Protocol + ethers.js
+- **区块链**: EVM-compatible Blockchains (e.g., Ethereum, Polygon) + ethers.js
 - **加密**: AES-256-GCM私钥加密存储
 - **部署**: Docker + Docker Compose + Nginx
 
 ## 核心功能
 
-### 1. NFC钱包注册  
+### 1. 多样化的钱包创建方式
 
-- 通过NFC UID自动生成Injective钱包
-- 支持双地址格式 (inj地址 + eth兼容地址)
-- 私钥AES-256-GCM加密存储
-- 支持重复读取已注册的NFC卡片
+EOP协议支持多种钱包创建方式，旨在降低用户进入Web3的门槛：
 
-### 2. .inj域名系统
+- **NFC实体卡片创建**: 用户只需将NFC卡片贴近设备，即可自动生成一个安全的EVM兼容钱包，实现物理世界与数字资产的无缝连接。
+- **Passkey (iOS/Android)**: 针对Web2用户，我们支持通过Passkey（如Face ID, Touch ID）一键创建钱包，无需记忆复杂的助记词，体验如丝般顺滑。
+- **传统Web3方式**: 同时，我们也为资深Web3用户保留了通过传统方式（如助记词）创建和导入钱包的选项。
 
-- 用户名唯一性验证
-- 支持用户名编辑和删除
-- 用户名格式验证（3-50字符，字母数字下划线连字符）
+### 2. NFT Minting
+
+- 用户成功创建钱包后，可以Mint一枚独特的小猫NFT作为纪念，开启他们的Web3之旅。
 
 ### 3. 安全特性
 
