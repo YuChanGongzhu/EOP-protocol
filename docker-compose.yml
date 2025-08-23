@@ -1,10 +1,27 @@
 services:
+  # Nginx反向代理 (支持HTTPS)
+  nginx:
+    image: nginx:alpine
+    container_name: egoda-pass-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./front-end:/usr/share/nginx/html
+      - ./nginx-https.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/letsencrypt/live/eop-protocol.duckdns.org:ro
+    depends_on:
+      - frontend-next
+      - backend
+    restart: unless-stopped
+    networks:
+      - egoda-pass
   # 前端服务 - Nginx
   frontend-next:
     build:
       context: ./front-end-next
       dockerfile: Dockerfile
-    container_name: injective-pass-frontend-next
+    container_name: egoda-pass-frontend-next
     ports:
       - "3001:3000"
     environment:
@@ -16,14 +33,14 @@ services:
       - backend
     restart: unless-stopped
     networks:
-      - injective-pass
+      - egoda-pass
 
   # 后端服务
   backend:
     build:
       context: ./nfc-wallet-backend
       dockerfile: Dockerfile
-    container_name: injective-pass-backend
+    container_name: egoda-pass-backend
     ports:
       - "8080:3000"
     environment:
@@ -51,7 +68,7 @@ services:
         condition: service_started
     restart: unless-stopped
     networks:
-      - injective-pass
+      - egoda-pass
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
       interval: 30s
@@ -68,7 +85,7 @@ services:
   # PostgreSQL 数据库
   postgres:
     image: postgres:15-alpine
-    container_name: injective-pass-postgres
+    container_name: egoda-pass-postgres
     environment:
       POSTGRES_DB: nfc_wallet
       POSTGRES_USER: nfc_user
@@ -79,7 +96,7 @@ services:
       - "5432:5432"
     restart: unless-stopped
     networks:
-      - injective-pass
+      - egoda-pass
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U nfc_user -d nfc_wallet" ]
       interval: 10s
@@ -89,7 +106,7 @@ services:
   # Redis 缓存
   redis:
     image: redis:7-alpine
-    container_name: injective-pass-redis
+    container_name: egoda-pass-redis
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -97,7 +114,7 @@ services:
       - "6379:6379"
     restart: unless-stopped
     networks:
-      - injective-pass
+      - egoda-pass
 
 volumes:
   postgres_data:
@@ -106,5 +123,5 @@ volumes:
     driver: local
 
 networks:
-  injective-pass:
+  egoda-pass:
     driver: bridge
