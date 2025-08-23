@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { createWallet, storeWallet } from '@/lib/wallet';
 import './wallet.css';
 
 export default function WalletScreen() {
@@ -50,12 +51,43 @@ export default function WalletScreen() {
   };
 
   // 处理继续按钮
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedWallet) {
       if (selectedWallet === 'passkey') {
         router.push('/passkey-create');
-      } else {
+      } else if(selectedWallet === 'nfc'){
         router.push('/nfc-scan');
+      } else if (selectedWallet === 'web3') {
+        // 创建传统钱包
+        try {
+          console.log('创建传统钱包...');
+          const walletData = createWallet();
+          
+          // 存储钱包数据到 localStorage
+          const stored = storeWallet(walletData);
+          
+          if (stored) {
+            console.log('钱包创建成功:', {
+              address: walletData.address,
+              publicKey: walletData.publicKey,
+              // 不在日志中显示私钥和助记词
+            });
+            
+            // 存储用户域名 (使用地址的一部分作为默认域名)
+            const defaultDomain = `user-${walletData.address.slice(2, 8)}.egoda`;
+            localStorage.setItem('userDomain', defaultDomain);
+            
+            // 跳转到 dashboard
+            router.push('/dashboard');
+          } else {
+            alert('钱包创建失败，请重试');
+          }
+        } catch (error) {
+          console.error('创建钱包时出错:', error);
+          alert('钱包创建失败，请重试');
+        }
+      } else {
+        router.push('/dashboard');
       }
     }
   };
