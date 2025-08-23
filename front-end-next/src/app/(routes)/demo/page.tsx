@@ -1,3 +1,4 @@
+"use client";
 import NfcRegisterForm from '@/components/NfcRegisterForm';
 import SocialInteractionForm from '@/components/SocialInteractionForm';
 import DrawWithTicketsForm from '@/components/DrawWithTicketsForm';

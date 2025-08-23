@@ -5,6 +5,7 @@ import IdCard from '@/components/dashboard/IdCard';
 import BalanceModule from '@/components/dashboard/BalanceModule';
 import CollectionGrid from '@/components/dashboard/CollectionGrid';
 import { NfcApi } from '@/lib/api';
+import { Logger } from '@/lib/logger';
 import './dashboard.css';
 
 export default function Dashboard() {
@@ -14,13 +15,13 @@ export default function Dashboard() {
     imageUrl: string;
     walletAddress: string;
   } | null>(null);
-  
+
   const [balances, setBalances] = useState({
     eth: '0',
     usdt: '0',
     xp: '0'
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('总览');
   const [publicKey, setPublicKey] = useState('');
@@ -30,29 +31,7 @@ export default function Dashboard() {
   const [isMinting, setIsMinting] = useState(false);
   const [showMintedNFTModal, setShowMintedNFTModal] = useState(false);
 
-  // 生成模拟钱包地址
-  const generateMockAddress = (uid: string | null): string => {
-    if (!uid) return '0x' + Math.random().toString(36).substring(2, 15);
-    return '0x' + uid.replace(/:/g, '').substring(0, 38);
-  };
-
-  // 生成随机公钥和私钥
-  const generateKeys = () => {
-    const chars = '0123456789abcdef';
-    let publicKey = '0x';
-    let privateKey = '0x';
-    
-    for (let i = 0; i < 64; i++) {
-      publicKey += chars[Math.floor(Math.random() * chars.length)];
-    }
-    
-    for (let i = 0; i < 64; i++) {
-      privateKey += chars[Math.floor(Math.random() * chars.length)];
-    }
-    
-    setPublicKey(publicKey);
-    setPrivateKey(privateKey);
-  };
+  // 从 localStorage 读取真实钱包（无则由 API 创建）
 
   // Cat NFT mock data with probabilities
   const catNFTs = [
@@ -88,61 +67,76 @@ export default function Dashboard() {
     // 从localStorage获取用户数据
     const loadUserData = async () => {
       try {
-        const storedDomain = localStorage.getItem('userDomain');
+        const storedDomain = null;
         const storedNfcUid = localStorage.getItem('nfcUid');
-        
+
         // 使用存储的域名或默认域名
-        const userDomain = storedDomain || 'user.egoda';
-        
+        const userDomain = 'user.egoda';
+
         if (!storedDomain) {
           console.log('未找到用户域名，使用默认值');
           // 不再重定向到minting页面，直接在dashboard中处理
         }
-        
-        // 获取或生成钱包地址
+
+        // 获取或创建真实钱包
         let walletAddress = localStorage.getItem('walletAddress');
-        if (!walletAddress) {
-          // 如果没有存储的钱包地址，尝试从API获取或生成一个模拟地址
+        let storedWallet = localStorage.getItem('traditionalWallet');
+        if (!storedWallet) {
+          // 创建钱包并存储
+          const created = await NfcApi.createWallet();
+          Logger.info('Dashboard: auto-created wallet', { address: created.address });
+          storedWallet = JSON.stringify(created);
+        }
+        if (!walletAddress && storedWallet) {
           try {
-            if (storedNfcUid) {
-              const walletData = await NfcApi.wallet(storedNfcUid);
-              walletAddress = walletData.address;
+            const parsed = JSON.parse(storedWallet);
+            walletAddress = parsed.address;
+          } catch { }
+        }
+        // 若 NFC 已绑定特定地址，优先展示链上地址
+        if (storedNfcUid) {
+          try {
+            const walletData = await NfcApi.wallet(storedNfcUid);
+            if ((walletData as any)?.address) {
+              walletAddress = (walletData as any).address;
             }
-          } catch (error) {
-            console.error('获取钱包地址失败:', error);
-          }
-          
-          // 如果API调用失败或没有NFC UID，生成一个模拟地址
-          if (!walletAddress) {
-            walletAddress = generateMockAddress(storedNfcUid);
-          }
-          
-          // 保存到localStorage
+          } catch { }
+        }
+        if (walletAddress) {
           localStorage.setItem('walletAddress', walletAddress);
         }
-        
+        // 兜底，确保为字符串
+        walletAddress = walletAddress || '';
+
         // 生成NFT图像URL
-        const imageUrl = localStorage.getItem('nftImageUrl') || 
+        const imageUrl = localStorage.getItem('nftImageUrl') ||
           `https://placehold.co/400x600/FFFFFF/1F2937?text=${userDomain}`;
-        
+
+        Logger.info('Dashboard: user data ready', { walletAddress: walletAddress });
         setUserData({
           domain: userDomain,
           imageUrl: imageUrl,
           walletAddress: walletAddress
         });
-        
-        // 获取余额数据
-        fetchBalances(walletAddress);
-        
-        // 生成随机公钥和私钥
-        generateKeys();
+
+        // 设置密钥显示
+        try {
+          const parsed = storedWallet ? JSON.parse(storedWallet) : null;
+          if (parsed?.publicKey) setPublicKey(parsed.publicKey);
+          if (parsed?.privateKey) setPrivateKey(parsed.privateKey);
+        } catch { }
+
+        // 获取余额数据（非空且为以太坊地址时）
+        if (walletAddress && /^0x[0-9a-fA-F]{40}$/.test(walletAddress)) {
+          fetchBalances(walletAddress);
+        }
       } catch (error) {
-        console.error('加载用户数据失败:', error);
+        Logger.error('Dashboard: 加载用户数据失败', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadUserData();
   }, [router]);
 
@@ -151,13 +145,14 @@ export default function Dashboard() {
     try {
       // 调用API获取余额
       const balanceData = await NfcApi.balance(address);
+      Logger.info('Dashboard: balances', balanceData);
       setBalances({
         eth: balanceData.eth || '0',
         usdt: balanceData.usdt || '0',
         xp: '100' // 示例XP值，API中可能没有返回
       });
     } catch (error) {
-      console.error('获取余额失败:', error);
+      Logger.error('Dashboard: 获取余额失败', error);
       // 使用模拟数据
       setBalances({
         eth: '0',
@@ -237,7 +232,7 @@ export default function Dashboard() {
       </div>
     );
   }
-  
+
   // 如果没有用户数据，将在useEffect中重定向
   if (!userData) {
     return null;
@@ -247,7 +242,7 @@ export default function Dashboard() {
     <div className="relative min-h-screen w-screen overflow-hidden bg-white">
       {/* 背景特效 */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-screen bg-gradient-radial from-[#56f5ca]/10 to-transparent to-70% z-[1] pointer-events-none"></div>
-      
+
       {/* 主内容 */}
       <div className="dashboard-container">
         {/* 钱包概览 */}
@@ -273,7 +268,7 @@ export default function Dashboard() {
             </div>
             <div className="egoda-badge">Egoda</div>
           </div>
-          
+
           {/* 主余额显示 */}
           <div className="main-balance">
             <div className="balance-amount">¥{balances.usdt}</div>
@@ -282,29 +277,29 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        
+
         {/* 资产分类标签 */}
         <div className="asset-tabs">
-          <button 
+          <button
             className={`tab-btn ${activeTab === '总览' ? 'active' : ''}`}
             onClick={() => handleTabChange('总览')}
           >
             总览
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === '生态' ? 'active' : ''}`}
             onClick={() => handleTabChange('生态')}
           >
             生态
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === '设置' ? 'active' : ''}`}
             onClick={() => handleTabChange('设置')}
           >
             设置
           </button>
         </div>
-        
+
         {/* 内容区域 */}
         {activeTab === '总览' && (
           <div className="asset-list">
@@ -316,7 +311,7 @@ export default function Dashboard() {
                 </svg>
               </button>
             </div>
-            
+
             <div className="asset-items">
               <div className="asset-item">
                 <div className="asset-icon eth">
@@ -336,13 +331,13 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        
+
         {activeTab === '生态' && (
           <div className="ecosystem-list">
             <div className="ecosystem-header">
               <span className="ecosystem-title">生态项目</span>
             </div>
-            
+
             <div className="ecosystem-items">
               <div className="ecosystem-item">
                 <div className="ecosystem-icon">
@@ -361,13 +356,13 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        
+
         {activeTab === '设置' && (
           <div className="settings-list">
             <div className="settings-header">
               <span className="settings-title">设置</span>
             </div>
-            
+
             <div className="settings-items">
               <div className="settings-item">
                 <div className="settings-icon">
@@ -387,7 +382,7 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-      
+
       {/* Powered by */}
       <div className="powered-by-container">
         <span className="powered-by-text">ETH SZ Hackathon Preview</span>
@@ -405,7 +400,7 @@ export default function Dashboard() {
                 </svg>
               </button>
             </div>
-            
+
             <div className="private-key-modal-body">
               <div className="private-key-info">
                 <h4 className="private-key-label">您的私钥：</h4>
@@ -415,7 +410,7 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            
+
             <div className="private-key-modal-footer">
               <button className="private-key-modal-close-button" onClick={closePrivateKeyModal}>
                 关闭

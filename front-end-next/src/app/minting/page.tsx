@@ -1,11 +1,20 @@
 "use client";
-import { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DomainRegisterForm from '@/components/DomainRegisterForm';
 import { NfcApi } from '@/lib/api';
 import './minting.css';
 
 export default function MintingPage() {
+  return (
+    <Suspense fallback={null}>
+      <MintingContent />
+    </Suspense>
+  );
+}
+
+function MintingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<'domain' | 'minting'>('domain');
@@ -17,67 +26,22 @@ export default function MintingPage() {
   const [error, setError] = useState<string | null>(null);
   const [nfcUid, setNfcUid] = useState<string | null>(null);
 
-  // 检查域名可用性
+  // 检查域名可用性（以太坊版不支持域名）
   const checkDomainAvailability = async () => {
-    if (!domain.trim()) return;
-    
-    setIsChecking(true);
-    setError(null);
-    
-    try {
-      // 使用NfcApi检查域名可用性
-      const fullDomain = domain.trim();
-      const result = await NfcApi.domainCheck(fullDomain);
-      setIsAvailable(result.available);
-    } catch (err: any) {
-      console.error('检查域名失败:', err);
-      setError(err?.message || '检查域名失败，请重试');
-      setIsAvailable(false);
-    } finally {
-      setIsChecking(false);
-    }
+    setIsAvailable(false);
+    setError('以太坊版本不支持域名');
   };
 
-  // 处理铸造过程
+  // 处理铸造过程（以太坊版不支持域名）
   const handleMint = async () => {
-    if (!domain.trim() || !isAvailable || !nfcUid) return;
-    
-    setStep('minting');
-    setIsMinting(true);
-    setMintingStatus('正在铸造您的Injective身份...');
-    
-    try {
-      // 注册域名
-      const result = await NfcApi.domainRegister({ uid: nfcUid, domainPrefix: domain.trim() });
-      
-      setMintingStatus('完成');
-      
-      // 保存域名信息到localStorage，以便仪表盘页面使用
-      localStorage.setItem('userDomain', result.domain || `advx-${domain.trim()}.inj`);
-      
-      // 铸造完成后跳转到仪表盘
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
-    } catch (err: any) {
-      console.error('铸造失败:', err);
-      setError(err?.message || '铸造失败，请重试');
-      setStep('domain');
-    } finally {
-      setIsMinting(false);
-    }
+    setError('以太坊版本不支持域名');
   };
 
   // 处理手动注册成功
   const handleManualRegisterSuccess = (domain: string) => {
-    // 显示成功消息
     setError(null);
     setMintingStatus('注册成功');
-    
-    // 保存域名信息到localStorage，以便仪表盘页面使用
     localStorage.setItem('userDomain', domain);
-    
-    // 短暂延迟后跳转到仪表盘
     setTimeout(() => {
       router.push('/dashboard');
     }, 1500);
@@ -85,15 +49,11 @@ export default function MintingPage() {
 
   // 从URL参数或localStorage获取NFC UID
   useEffect(() => {
-    // 首先尝试从URL参数获取
     const uidFromUrl = searchParams.get('uid');
-    
     if (uidFromUrl) {
       setNfcUid(uidFromUrl);
-      // 保存到localStorage以便后续使用
       localStorage.setItem('nfcUid', uidFromUrl);
     } else {
-      // 尝试从localStorage获取
       const storedUid = localStorage.getItem('nfcUid') || sessionStorage.getItem('nfcUid');
       if (storedUid) {
         setNfcUid(storedUid);
@@ -106,7 +66,7 @@ export default function MintingPage() {
       {/* 返回按钮 */}
       <button 
         onClick={() => router.push('/nfc-scan')}
-        className="absolute top-4 left-4 z-50 bg-white/10 hover:bg-white/20 rounded-full p-2 text-white transition-all duration-300"
+        className="absolute top-4 left-4 z-50 bg-white/10 hover:bg白/20 rounded-full p-2 text-white transition-all duration-300"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
           strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -142,63 +102,19 @@ export default function MintingPage() {
         <div className="minting-card">
           {step === 'domain' ? (
             <div id="minting-step-domain">
-              <h2 className="minting-title">
-                <span className="emoji-fade-in">🌍</span> 创建您的.inj域名
-              </h2>
+              <h2 className="minting-title">域名功能已移除</h2>
 
               {nfcUid && (
                 <>
                   {/* 域名输入 */}
-                  <div className="minting-input-container">
-                    <span className="minting-input-prefix">advx-</span>
-                    <input 
-                      type="text" 
-                      className="minting-input" 
-                      placeholder="例如: Vincent" 
-                      value={domain}
-                      onChange={(e) => {
-                        setDomain(e.target.value);
-                        setIsAvailable(null);
-                      }}
-                    />
-                    <span className="minting-input-suffix">.inj</span>
-                  </div>
+                  <p className="text-white/70 text-center">以太坊版无需域名，直接使用钱包地址与 NFC 交互。</p>
 
                   {/* 检查按钮 */}
-                  <button 
-                    className="minting-check-btn" 
-                    onClick={checkDomainAvailability}
-                    disabled={isChecking || !domain.trim()}
-                  >
-                    {isChecking ? '检查中...' : '检查可用性'}
-                  </button>
+                  <button className="minting-mint-btn-disabled" disabled>不可用</button>
 
                   {/* 反馈信息 */}
                   <div className="minting-feedback">
-                    {isAvailable === true && (
-                      <>
-                        <button 
-                          className="minting-mint-btn"
-                          onClick={handleMint}
-                        >
-                          铸造并激活
-                        </button>
-                        <p className="minting-fee-note">无需Gas费用</p>
-                      </>
-                    )}
-                    
-                    {isAvailable === false && (
-                      <>
-                        <p className="minting-error">域名已被注册</p>
-                        <button 
-                          className="minting-mint-btn-disabled"
-                          disabled
-                        >
-                          铸造并激活
-                        </button>
-                      </>
-                    )}
-                    
+                    <p className="minting-error">此页面仅保留占位，域名流程已移除。</p>
                     {error && <p className="minting-error">{error}</p>}
                   </div>
                 </>

@@ -19,7 +19,7 @@ export default function WalletScreen() {
     const userAgent = navigator.userAgent;
     setIsIPhone(/iPhone|iPad|iPod/.test(userAgent));
     setIsAndroid(/Android/.test(userAgent));
-    
+
     // 根据设备类型默认选中
     if (/iPhone|iPad|iPod/.test(userAgent)) {
       setSelectedWallet('passkey');
@@ -38,7 +38,7 @@ export default function WalletScreen() {
     if (adventureSection) {
       adventureSection.style.display = 'block';
     }
-    
+
     // 启用继续按钮
     const continueBtn = document.getElementById('wallet-continue-btn');
     if (continueBtn) {
@@ -56,35 +56,35 @@ export default function WalletScreen() {
     if (selectedWallet) {
       // 显示创建动画
       setIsCreating(true);
-      
+
       // 随机延迟1-3秒
       const randomDelay = Math.random() * 2000 + 1000; // 1000-3000ms
-      
+
       setTimeout(() => {
         if (selectedWallet === 'passkey') {
-          router.push('/passkey-create');
-        } else if(selectedWallet === 'nfc'){
+          router.push('/passkey-check');
+        } else if (selectedWallet === 'nfc') {
           router.push('/nfc-scan');
         } else if (selectedWallet === 'web3') {
           // 创建传统钱包
           try {
             console.log('创建传统钱包...');
             const walletData = createWallet();
-            
+
             // 存储钱包数据到 localStorage
             const stored = storeWallet(walletData);
-            
+
             if (stored) {
               console.log('钱包创建成功:', {
                 address: walletData.address,
                 publicKey: walletData.publicKey,
                 // 不在日志中显示私钥和助记词
               });
-              
+
               // 存储用户域名 (使用地址的一部分作为默认域名)
               const defaultDomain = `user-${walletData.address.slice(2, 8)}.egoda`;
               localStorage.setItem('userDomain', defaultDomain);
-              
+
               // 跳转到 dashboard
               router.push('/dashboard');
             } else {
@@ -146,7 +146,7 @@ export default function WalletScreen() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-screen bg-gradient-radial from-[#56f5ca]/10 to-transparent to-70% z-[1] pointer-events-none"></div>
 
       {/* 返回按钮 */}
-      <button 
+      <button
         onClick={handleGoBack}
         className="absolute top-4 left-4 z-50 bg-black/10 hover:bg-black/20 rounded-full p-2 text-black transition-all duration-300"
       >
@@ -176,10 +176,10 @@ export default function WalletScreen() {
                 </>
               )}
             </p>
-            
+
             {/* 钱包选项卡片 */}
             <div className="wallet-cards">
-              <button 
+              <button
                 className={`wallet-card ${selectedWallet === 'passkey' ? 'selected' : ''} ${isAndroid ? 'disabled' : ''}`}
                 onClick={() => !isAndroid && handleWalletSelect('passkey')}
                 disabled={isAndroid}
@@ -195,8 +195,8 @@ export default function WalletScreen() {
                   <p className="card-subtitle">使用面容ID继续</p>
                 </div>
               </button>
-              
-              <button 
+
+              <button
                 className={`wallet-card ${selectedWallet === 'nfc' ? 'selected' : ''} ${isIPhone ? 'disabled' : ''}`}
                 onClick={() => !isIPhone && handleWalletSelect('nfc')}
                 disabled={isIPhone}
@@ -211,8 +211,8 @@ export default function WalletScreen() {
                   <p className="card-subtitle">{isIPhone ? 'iOS设备支持即将推出' : '物理级安全访问'}</p>
                 </div>
               </button>
-              
-              <button 
+
+              <button
                 className={`wallet-card ${selectedWallet === 'web3' ? 'selected' : ''}`}
                 onClick={() => handleWalletSelect('web3')}
               >
@@ -227,7 +227,7 @@ export default function WalletScreen() {
                 </div>
               </button>
             </div>
-            
+
             {/* Adventure部分 */}
             <div id="adventure-section" className="hidden">
               <h2 className="text-xl font-bold text-black mt-8 mb-2">
@@ -236,9 +236,9 @@ export default function WalletScreen() {
               <p className="text-gray-600 mb-6">
                 {getActivationDescription()}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button 
+                <button
                   id="wallet-continue-btn"
                   onClick={handleContinue}
                   disabled={!selectedWallet}
@@ -288,7 +288,7 @@ export default function WalletScreen() {
                 </svg>
               </button>
             </div>
-            
+
             <div className="modal-body">
               <div className="info-section">
                 <h4 className="info-title">这是什么？</h4>
@@ -296,14 +296,14 @@ export default function WalletScreen() {
                   Apple 在 iOS 推出的"通行密钥"，不用记密码，靠面容或指纹登录；密钥放在 iCloud 钥匙串里，在你的设备间同步，日常更省心。
                 </p>
               </div>
-              
+
               <div className="info-section">
                 <h4 className="info-title">怎么使用？</h4>
                 <p className="info-content">
                   在 iOS 的 App 或网站登录时，选"用通行密钥登录"，按面容ID或触控ID确认即可；iCloud 会自动填入，Apple 设备之间也能配合使用。
                 </p>
               </div>
-              
+
               <div className="info-section">
                 <h4 className="info-title">这安全吗？</h4>
                 <p className="info-content">
@@ -311,7 +311,7 @@ export default function WalletScreen() {
                 </p>
               </div>
             </div>
-            
+
             <button className="modal-close-button" onClick={closeModal}>
               关闭
             </button>

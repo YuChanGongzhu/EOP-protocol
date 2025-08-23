@@ -1,0 +1,229 @@
+[
+    {
+        "type": "constructor",
+        "inputs": [
+            {
+                "name": "_nfcRegistry",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "drawFee",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "socialInteraction",
+        "inputs": [
+            {
+                "name": "myNFC",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "otherNFC",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "socialInteractionWithSig",
+        "inputs": [
+            {
+                "name": "myNFC",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "otherNFC",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "wallet",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "signature",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "drawCatNFTWithTickets",
+        "inputs": [
+            {
+                "name": "nfcUID",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "catName",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "drawCatNFTWithTicketsWithSig",
+        "inputs": [
+            {
+                "name": "nfcUID",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "catName",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "wallet",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "signature",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "getDrawStats",
+        "inputs": [
+            {
+                "name": "nfcUID",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "available",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "used",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "total",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getInteractedNFCs",
+        "inputs": [
+            {
+                "name": "nfcUID",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "string[]",
+                "internalType": "string[]"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "CatNFTMinted",
+        "inputs": [
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "indexed": true,
+                "internalType": "string"
+            },
+            {
+                "name": "rarity",
+                "type": "uint8",
+                "indexed": false,
+                "internalType": "uint8"
+            },
+            {
+                "name": "color",
+                "type": "string",
+                "indexed": false,
+                "internalType": "string"
+            },
+            {
+                "name": "owner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "mintedAt",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    }
+]

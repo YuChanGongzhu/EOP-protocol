@@ -1,46 +1,141 @@
-import { API_BASE_URL } from '@/lib/config';
-
-export type Json = Record<string, unknown> | Array<unknown> | string | number | boolean | null;
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${API_BASE_URL}${path}`, {
-        headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
-        cache: 'no-store',
-        ...init,
-    });
-    if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`HTTP ${res.status}: ${txt}`);
-    }
-    return res.json();
-}
+import { ethers } from 'ethers';
+import { getProvider, getNFCContract, getCatContract, ensureSigner, getSponsorSigner } from '@/lib/contracts';
+import { createWallet as createLocalWallet, storeWallet as storeLocalWallet } from '@/lib/wallet';
+import { Logger } from '@/lib/logger';
 
 export const NfcApi = {
-    register: (body: { uid: string; nickname?: string }) =>
-        request('/api/nfc/register', { method: 'POST', body: JSON.stringify(body) }),
-    wallet: (uid: string) => request(`/api/nfc/wallet/${uid}`),
-    stats: () => request('/api/nfc/stats'),
-    balance: (address: string) => request(`/api/nfc/balance/${address}`),
-    domainCheck: (domainPrefix: string) => request(`/api/nfc/domain/check?domainPrefix=${encodeURIComponent(domainPrefix)}`),
-    domainRegister: (body: { uid: string; domainPrefix: string }) =>
-        request('/api/nfc/domain/register', { method: 'POST', body: JSON.stringify(body) }),
-    socialInteraction: (body: { myNFC: string; otherNFC: string }) =>
-        request('/api/nfc/social-interaction', { method: 'POST', body: JSON.stringify(body) }),
-    drawWithTickets: (body: { nfcUid: string; catName: string }) =>
-        request('/api/nfc/draw-cat-with-tickets', { method: 'POST', body: JSON.stringify(body) }),
-    drawStats: (nfcUID: string) => request(`/api/nfc/draw-stats/${nfcUID}`),
-    interactedNFCs: (nfcUID: string) => request(`/api/nfc/interacted-nfcs/${nfcUID}`),
+    // 创建本地以太坊钱包并存储到 localStorage（私钥明文存储仅用于演示）
+    createWallet: async () => {
+        const w = createLocalWallet();
+        storeLocalWallet(w);
+        Logger.info('Wallet/Create: stored', { address: w.address });
+        return {
+            address: w.address,
+            privateKey: w.privateKey,
+            publicKey: w.publicKey,
+            mnemonic: w.mnemonic,
+            createdAt: Date.now(),
+        };
+    },
+    // 自助绑定空白卡
+    register: async (body: { uid: string; nickname?: string }) => {
+        const sponsor = getSponsorSigner();
+        if (sponsor) {
+            const nfcSponsor = getNFCContract(sponsor);
+            const userSigner = await ensureSigner();
+            const userAddr = await userSigner!.getAddress();
+            const nonce: bigint = await nfcSponsor.getNonce(userAddr);
+            const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
+            const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
+                ['address', 'string', 'address', 'string', 'uint256', 'uint256'],
+                [await nfcSponsor.getAddress(), 'sponsorBindBlankCard', userAddr, body.uid, nonce, deadline]
+            );
+            const messageHash = ethers.keccak256(encoded);
+            const signature = await userSigner!.signMessage(ethers.getBytes(messageHash));
+            Logger.info('NFC/sponsorBindBlankCard: send', { uid: body.uid, user: userAddr, nonce: nonce.toString() });
+            const tx = await nfcSponsor.sponsorBindBlankCard(body.uid, userAddr, deadline, nonce, signature);
+            const receipt = await tx.wait();
+            Logger.info('NFC/sponsorBindBlankCard: mined', { txHash: receipt?.hash });
+            return { txHash: receipt?.hash } as any;
+        }
+        const signer = await ensureSigner();
+        const nfc = getNFCContract(signer);
+        Logger.info('NFC/selfBindBlankCard: send', body);
+        const tx = await nfc.selfBindBlankCard(body.uid);
+        const receipt = await tx.wait();
+        Logger.info('NFC/selfBindBlankCard: mined', { txHash: receipt?.hash });
+        return { txHash: receipt?.hash } as any;
+    },
+    // 查询某 NFC 绑定的钱包地址
+    wallet: async (uid: string) => {
+        const nfc = getNFCContract(getProvider());
+        try {
+            const binding = await nfc.getNFCBinding(uid);
+            const addr: string = binding.walletAddress as string;
+            const ok = ethers.isAddress(addr) ? addr : '';
+            Logger.info('NFC/getNFCBinding: result', { uid, address: ok });
+            return { address: ok } as any;
+        } catch (e) {
+            Logger.warn('NFC/getNFCBinding: failed', e);
+            return { address: '' } as any;
+        }
+    },
+    // 余额直接链上查
+    balance: async (address: string) => {
+        if (!ethers.isAddress(address)) {
+            return { eth: '0', usdt: '0' } as any;
+        }
+        const provider = getProvider();
+        const balance = await provider.getBalance(address);
+        const formatted = ethers.formatEther(balance);
+        Logger.info('Balance/getBalance: ok', { address, eth: formatted });
+        return { eth: formatted, usdt: '0' } as any;
+    },
+    // 社交互动
+    socialInteraction: async (body: { myNFC: string; otherNFC: string }) => {
+        const signer = await ensureSigner();
+        const cat = getCatContract(signer);
+        Logger.info('CatNFT/socialInteraction: send', body);
+        const tx = await cat.socialInteraction(body.myNFC, body.otherNFC);
+        const receipt = await tx.wait();
+        Logger.info('CatNFT/socialInteraction: mined', { txHash: receipt?.hash });
+        return { transactionHash: receipt?.hash } as any;
+    },
+    // 用券抽卡
+    drawWithTickets: async (body: { nfcUid: string; catName: string }) => {
+        const sponsor = getSponsorSigner();
+        if (sponsor) {
+            const catSponsor = getCatContract(sponsor);
+            const userSigner = await ensureSigner();
+            const userAddr = await userSigner!.getAddress();
+            const nonce: bigint = await catSponsor.nonces(userAddr);
+            const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
+            const fee = await catSponsor.drawFee();
+            const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
+                ['address', 'string', 'address', 'string', 'string', 'uint256', 'uint256'],
+                [await catSponsor.getAddress(), 'drawCatNFTWithTickets', userAddr, body.nfcUid, body.catName, nonce, deadline]
+            );
+            const messageHash = ethers.keccak256(encoded);
+            const signature = await userSigner!.signMessage(ethers.getBytes(messageHash));
+            Logger.info('CatNFT/drawWithTicketsWithSig: send', { ...body, user: userAddr, fee: fee.toString() });
+            const tx = await catSponsor.drawCatNFTWithTicketsWithSig(body.nfcUid, body.catName, userAddr, deadline, nonce, signature, { value: fee });
+            const receipt = await tx.wait();
+            Logger.info('CatNFT/drawWithTicketsWithSig: mined', { txHash: receipt?.hash });
+            return { txHash: receipt?.hash } as any;
+        }
+        const signer = await ensureSigner();
+        const cat = getCatContract(signer);
+        const fee = await cat.drawFee();
+        Logger.info('CatNFT/drawWithTickets: send', { ...body, fee: fee.toString() });
+        const tx = await cat.drawCatNFTWithTickets(body.nfcUid, body.catName, { value: fee });
+        const receipt = await tx.wait();
+        Logger.info('CatNFT/drawWithTickets: mined', { txHash: receipt?.hash });
+        return { txHash: receipt?.hash } as any;
+    },
+    // 统计
+    drawStats: async (nfcUID: string) => {
+        const cat = getCatContract(getProvider());
+        const [available, used, total] = await cat.getDrawStats(nfcUID);
+        const result = { availableDraws: Number(available), usedDraws: Number(used), totalDraws: Number(total) } as any;
+        Logger.info('CatNFT/getDrawStats: result', { nfcUID, ...result });
+        return result;
+    },
+    interactedNFCs: async (nfcUID: string) => {
+        const cat = getCatContract(getProvider());
+        const list = await cat.getInteractedNFCs(nfcUID);
+        Logger.info('CatNFT/getInteractedNFCs: result', { nfcUID, count: list.length });
+        return { list } as any;
+    },
 };
 
 export const UserApi = {
-    profile: (uid: string) => request(`/api/user/profile/${uid}`),
-    updateDomain: (body: { uid: string; domainPrefix: string }) =>
-        request('/api/user/domain', { method: 'PUT', body: JSON.stringify(body) }),
-    checkDomain: (domainPrefix: string) => request(`/api/user/check-domain/${encodeURIComponent(domainPrefix)}`),
-    removeDomain: (uid: string) => request(`/api/user/domain/${uid}`, { method: 'DELETE' }),
-    list: (page = 1, limit = 20) => request(`/api/user/list?page=${page}&limit=${limit}`),
+    profile: async (_uid: string) => ({} as any),
+    updateDomain: async () => ({} as any),
+    checkDomain: async () => ({ available: false } as any),
+    removeDomain: async () => ({} as any),
+    list: async () => ({ users: [] } as any),
 };
 
 export const ContractApi = {
-    status: () => request('/api/contract/status'),
+    status: async () => ({ ok: true }),
 };

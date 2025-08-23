@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPasskey } from '@/lib/passkey';
+import { NfcApi } from '@/lib/api';
+import { Logger } from '@/lib/logger';
 import './passkey-create.css';
 
 export default function PasskeyCreatePage() {
@@ -16,6 +18,8 @@ export default function PasskeyCreatePage() {
     router.push('/wallet-screen');
   };
 
+  // 注意：是否存在 Passkey 的检测和自动登录已移动至 /passkey-check，避免重复发起 WebAuthn 导致 “A request is already pending.”
+
   // 处理创建Passkey
   const handleCreatePasskey = async () => {
     if (!username.trim()) {
@@ -26,23 +30,37 @@ export default function PasskeyCreatePage() {
 
     setStatus('creating');
     setErrorMessage('');
+    Logger.info('Passkey/Create: start', { username: username.trim() });
 
     try {
       const result = await createPasskey(username.trim());
-      
+      Logger.info('Passkey/Create: result', result);
+
       if (result.success) {
+        // 无条件创建并激活一个新的本地以太坊钱包，并与该 Passkey 关联
+        const created = await NfcApi.createWallet();
+        Logger.info('Wallet/Create: created', { address: created.address });
+        if (result.keyId) {
+          const raw = localStorage.getItem('passkeyWallets');
+          const map = raw ? JSON.parse(raw) : {};
+          map[result.keyId] = created;
+          localStorage.setItem('passkeyWallets', JSON.stringify(map));
+          localStorage.setItem('activePasskeyId', result.keyId);
+        }
         setStatus('success');
-        // 延迟跳转到铸造页面
+        Logger.info('Passkey/Create: success, redirect to /dashboard in 2s');
         setTimeout(() => {
           router.push('/dashboard');
         }, 2000);
       } else {
         setStatus('error');
         setErrorMessage(result.error || '创建失败，请重试');
+        Logger.error('Passkey/Create: failed', result.error);
       }
     } catch (error: any) {
       setStatus('error');
       setErrorMessage(error.message || '创建失败，请重试');
+      Logger.error('Passkey/Create: exception', error);
     }
   };
 
@@ -66,7 +84,7 @@ export default function PasskeyCreatePage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-screen bg-gradient-radial from-[#56f5ca]/10 to-transparent to-70% z-[1] pointer-events-none"></div>
 
       {/* 返回按钮 */}
-      <button 
+      <button
         onClick={handleGoBack}
         className="absolute top-4 left-4 z-50 bg-black/10 hover:bg-black/20 rounded-full p-2 text-black transition-all duration-300"
       >
@@ -95,39 +113,39 @@ export default function PasskeyCreatePage() {
 
           <div className="passkey-create-form">
             <div className="input-group">
-                              <label htmlFor="passkey-username" className="input-label">
-                  {language === 'zh' ? '您希望Egoda如何称呼您' : 'How would you like Egoda to call you'}
-                </label>
-                <input 
-                  type="text" 
-                  id="passkey-username" 
-                  className="input-field"
-                  placeholder={language === 'zh' ? '请输入您的昵称' : 'Enter your nickname'} 
-                  maxLength={20}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={status === 'creating'}
-                  suppressHydrationWarning={true}
-                />
-                <small className="input-hint">
-                  {language === 'zh' ? '信息将储存至iCloud' : 'Information will be stored in iCloud'}
-                </small>
+              <label htmlFor="passkey-username" className="input-label">
+                {language === 'zh' ? '您希望Egoda如何称呼您' : 'How would you like Egoda to call you'}
+              </label>
+              <input
+                type="text"
+                id="passkey-username"
+                className="input-field"
+                placeholder={language === 'zh' ? '请输入您的昵称' : 'Enter your nickname'}
+                maxLength={20}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={status === 'creating'}
+                suppressHydrationWarning={true}
+              />
+              <small className="input-hint">
+                {language === 'zh' ? '信息将储存至iCloud' : 'Information will be stored in iCloud'}
+              </small>
             </div>
 
-            <button 
+            <button
               className="passkey-create-btn"
               onClick={handleCreatePasskey}
               disabled={status === 'creating' || !username.trim()}
             >
               <span>
-                {status === 'creating' 
-                  ? (language === 'zh' ? '创建中...' : 'Creating...') 
+                {status === 'creating'
+                  ? (language === 'zh' ? '创建中...' : 'Creating...')
                   : (language === 'zh' ? '继续' : 'Continue')
                 }
               </span>
             </button>
 
-            <button 
+            <button
               className="passkey-back-btn"
               onClick={handleGoBack}
               disabled={status === 'creating'}

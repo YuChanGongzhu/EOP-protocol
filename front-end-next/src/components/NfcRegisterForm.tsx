@@ -14,8 +14,23 @@ export default function NfcRegisterForm({ onRegistered }: { onRegistered?: (res:
         setError(null);
         setLoading(true);
         try {
+            // 若无本地钱包，先创建并存储
+            const existing = typeof window !== 'undefined' ? localStorage.getItem('traditionalWallet') : null;
+            if (!existing) {
+                await NfcApi.createWallet();
+            }
             const res = await NfcApi.register({ uid, nickname: nickname || undefined });
-            onRegistered?.(res as WalletResponse);
+            onRegistered?.({
+                address: '',
+                ethAddress: '',
+                domain: null,
+                domainTokenId: null,
+                initialFunded: false,
+                domainRegistered: false,
+                nfcCard: { uid, nickname: nickname || undefined, isActive: true, isBlank: true },
+                recentTransactions: [],
+                isNewWallet: false,
+            } as WalletResponse);
         } catch (err: any) {
             setError(err?.message || '注册失败');
         } finally {
