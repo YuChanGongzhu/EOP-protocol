@@ -55,7 +55,7 @@ export default function Welcome() {
             {/* 按钮 */}
             <button 
               onClick={handleCreatePass}
-              className="group relative overflow-hidden bg-black text-white py-3 px-16 rounded-xl text-lg font-semibold tracking-wider shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-gray-800 w-full max-w-xs mx-auto"
+              className="group relative overflow-hidden bg-black text-white py-3 px-16 rounded-xl text-lg font-semibold tracking-wider shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-gray-800 w-full max-w-sm mx-auto"
             >
               <span>{language === 'zh' ? '立刻开始' : 'Start Now'}</span>
             </button>
