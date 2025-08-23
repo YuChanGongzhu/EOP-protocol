@@ -12,6 +12,7 @@ export default function WalletScreen() {
   const [isIPhone, setIsIPhone] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     // 检测设备类型
@@ -53,42 +54,50 @@ export default function WalletScreen() {
   // 处理继续按钮
   const handleContinue = async () => {
     if (selectedWallet) {
-      if (selectedWallet === 'passkey') {
-        router.push('/passkey-create');
-      } else if(selectedWallet === 'nfc'){
-        router.push('/nfc-scan');
-      } else if (selectedWallet === 'web3') {
-        // 创建传统钱包
-        try {
-          console.log('创建传统钱包...');
-          const walletData = createWallet();
-          
-          // 存储钱包数据到 localStorage
-          const stored = storeWallet(walletData);
-          
-          if (stored) {
-            console.log('钱包创建成功:', {
-              address: walletData.address,
-              publicKey: walletData.publicKey,
-              // 不在日志中显示私钥和助记词
-            });
+      // 显示创建动画
+      setIsCreating(true);
+      
+      // 随机延迟1-3秒
+      const randomDelay = Math.random() * 2000 + 1000; // 1000-3000ms
+      
+      setTimeout(() => {
+        if (selectedWallet === 'passkey') {
+          router.push('/passkey-create');
+        } else if(selectedWallet === 'nfc'){
+          router.push('/nfc-scan');
+        } else if (selectedWallet === 'web3') {
+          // 创建传统钱包
+          try {
+            console.log('创建传统钱包...');
+            const walletData = createWallet();
             
-            // 存储用户域名 (使用地址的一部分作为默认域名)
-            const defaultDomain = `user-${walletData.address.slice(2, 8)}.egoda`;
-            localStorage.setItem('userDomain', defaultDomain);
+            // 存储钱包数据到 localStorage
+            const stored = storeWallet(walletData);
             
-            // 跳转到 dashboard
-            router.push('/dashboard');
-          } else {
+            if (stored) {
+              console.log('钱包创建成功:', {
+                address: walletData.address,
+                publicKey: walletData.publicKey,
+                // 不在日志中显示私钥和助记词
+              });
+              
+              // 存储用户域名 (使用地址的一部分作为默认域名)
+              const defaultDomain = `user-${walletData.address.slice(2, 8)}.egoda`;
+              localStorage.setItem('userDomain', defaultDomain);
+              
+              // 跳转到 dashboard
+              router.push('/dashboard');
+            } else {
+              alert('钱包创建失败，请重试');
+            }
+          } catch (error) {
+            console.error('创建钱包时出错:', error);
             alert('钱包创建失败，请重试');
           }
-        } catch (error) {
-          console.error('创建钱包时出错:', error);
-          alert('钱包创建失败，请重试');
+        } else {
+          router.push('/dashboard');
         }
-      } else {
-        router.push('/dashboard');
-      }
+      }, randomDelay);
     }
   };
 
@@ -112,7 +121,7 @@ export default function WalletScreen() {
     if (selectedWallet === 'passkey') {
       return 'iCloud云上贵州托管';
     } else if (selectedWallet === 'nfc') {
-      return '拍卡即付';
+      return '拍卡即可';
     } else if (selectedWallet === 'web3') {
       return '使用传统Web3钱包';
     }
@@ -149,108 +158,117 @@ export default function WalletScreen() {
 
       {/* 钱包选择容器 */}
       <div className="wallet-selection-container">
-        <h2 className="text-2xl font-bold text-black mb-2 text-left w-full">
-          {language === 'zh' ? '选择方式' : 'Select Method'}
-        </h2>
-        <p className="wallet-subtitle text-left w-full">
-          {language === 'zh' ? (
-            <>
-              Egoda提供多种便捷登录<br />
-              或使用传统钱包
-            </>
-          ) : (
-            <>
-              Egoda provides multiple convenient login methods<br />
-              or use traditional wallet
-            </>
-          )}
-        </p>
-        
-        {/* 钱包选项卡片 */}
-        <div className="wallet-cards">
-          <button 
-            className={`wallet-card ${selectedWallet === 'passkey' ? 'selected' : ''} ${isAndroid ? 'disabled' : ''}`}
-            onClick={() => !isAndroid && handleWalletSelect('passkey')}
-            disabled={isAndroid}
-          >
-            {!isAndroid && <span className="recommend-badge">推荐</span>}
-            <div className="card-icon">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-              </svg>
-            </div>
-            <div className="card-content">
-              <h3 className="card-title">{isAndroid ? 'Android设备支持即将推出' : '通行密钥'}</h3>
-              <p className="card-subtitle">使用面容ID继续</p>
-            </div>
-          </button>
-          
-          <button 
-            className={`wallet-card ${selectedWallet === 'nfc' ? 'selected' : ''} ${isIPhone ? 'disabled' : ''}`}
-            onClick={() => !isIPhone && handleWalletSelect('nfc')}
-            disabled={isIPhone}
-          >
-            <div className="card-icon">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-            </div>
-            <div className="card-content">
-              <h3 className="card-title">NFC卡片</h3>
-              <p className="card-subtitle">{isIPhone ? 'iOS设备支持即将推出' : '进阶交易工具'}</p>
-            </div>
-          </button>
-          
-          <button 
-            className={`wallet-card ${selectedWallet === 'web3' ? 'selected' : ''}`}
-            onClick={() => handleWalletSelect('web3')}
-          >
-            <div className="card-icon">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 003 3v8a3 3 0 003 3z" />
-              </svg>
-            </div>
-            <div className="card-content">
-              <h3 className="card-title">传统钱包</h3>
-              <p className="card-subtitle">适合已有一定经验的人士</p>
-            </div>
-          </button>
-        </div>
-        
-        {/* Adventure部分 */}
-        <div id="adventure-section" className="hidden">
-          <h2 className="text-xl font-bold text-black mt-8 mb-2">
-            {getActivationTitle()}
-          </h2>
-          <p className="text-gray-600 mb-6">
-            {getActivationDescription()}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              id="wallet-continue-btn"
-              onClick={handleContinue}
-              disabled={!selectedWallet}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {language === 'zh' ? '继续' : 'Continue'}
-            </button>
+        {!isCreating ? (
+          <>
+            <h2 className="text-2xl font-bold text-black mb-2 text-left w-full">
+              {language === 'zh' ? '选择方式' : 'Select Method'}
+            </h2>
+            <p className="wallet-subtitle text-left w-full">
+              {language === 'zh' ? (
+                <>
+                  Egoda提供多种便捷登录<br />
+                  或使用传统钱包
+                </>
+              ) : (
+                <>
+                  Egoda provides multiple convenient login methods<br />
+                  or use traditional wallet
+                </>
+              )}
+            </p>
             
-            {selectedWallet !== 'web3' ? (
+            {/* 钱包选项卡片 */}
+            <div className="wallet-cards">
               <button 
-                id="wallet-skip-btn"
-                onClick={handlePasskeyInfo}
-                className="btn-ghost"
+                className={`wallet-card ${selectedWallet === 'passkey' ? 'selected' : ''} ${isAndroid ? 'disabled' : ''}`}
+                onClick={() => !isAndroid && handleWalletSelect('passkey')}
+                disabled={isAndroid}
               >
-                {language === 'zh' ? '什么是通行密钥' : 'What is Passkey'}
+                {!isAndroid && <span className="recommend-badge">推荐</span>}
+                <div className="card-icon">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3 className="card-title">{isAndroid ? 'Android设备支持即将推出' : '通行密钥'}</h3>
+                  <p className="card-subtitle">使用面容ID继续</p>
+                </div>
               </button>
-            ) : (
-              <div className="btn-ghost invisible">
-                <span>占位</span>
+              
+              <button 
+                className={`wallet-card ${selectedWallet === 'nfc' ? 'selected' : ''} ${isIPhone ? 'disabled' : ''}`}
+                onClick={() => !isIPhone && handleWalletSelect('nfc')}
+                disabled={isIPhone}
+              >
+                <div className="card-icon">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3 className="card-title">NFC卡片</h3>
+                  <p className="card-subtitle">{isIPhone ? 'iOS设备支持即将推出' : '物理级安全访问'}</p>
+                </div>
+              </button>
+              
+              <button 
+                className={`wallet-card ${selectedWallet === 'web3' ? 'selected' : ''}`}
+                onClick={() => handleWalletSelect('web3')}
+              >
+                <div className="card-icon">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3 className="card-title">传统钱包</h3>
+                  <p className="card-subtitle">适合已有一定经验的人士</p>
+                </div>
+              </button>
+            </div>
+            
+            {/* Adventure部分 */}
+            <div id="adventure-section" className="hidden">
+              <h2 className="text-xl font-bold text-black mt-8 mb-2">
+                {getActivationTitle()}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {getActivationDescription()}
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  id="wallet-continue-btn"
+                  onClick={handleContinue}
+                  disabled={!selectedWallet}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {language === 'zh' ? '继续' : 'Continue'}
+                </button>
               </div>
-            )}
+            </div>
+          </>
+        ) : (
+          /* 钱包创建动画 */
+          <div className="wallet-creating-container">
+            <div className="creating-icon">
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h2 className="creating-title">
+              {language === 'zh' ? 'Egoda为您创建中' : 'Egoda is creating for you'}
+            </h2>
+            <div className="creating-animation">
+              <div className="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Powered by 文本 */}

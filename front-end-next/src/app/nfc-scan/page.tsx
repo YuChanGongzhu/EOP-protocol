@@ -97,7 +97,7 @@ export default function NfcScanPage() {
       } else {
         console.warn('Web NFC API不受支持');
         setScanStatus('error');
-        setErrorMessage('您的浏览器不支持NFC功能，请手动输入');
+        setErrorMessage('部分国产安卓手机限制NFC策略，Egoda支持手动UID注册');
       }
     };
 
@@ -161,7 +161,7 @@ export default function NfcScanPage() {
                   {language === 'zh' ? '正在扫描' : 'Scanning'}
                 </h2>
                 <p className="nfc-subtitle">
-                  {language === 'zh' ? '请将您的AdventureX卡片靠近手机' : 'Please place your AdventureX card near your phone'}
+                  {language === 'zh' ? '请将您的NFC卡片靠近设备' : 'Please place your NFC card near your device'}
                 </p>
               </div>
 

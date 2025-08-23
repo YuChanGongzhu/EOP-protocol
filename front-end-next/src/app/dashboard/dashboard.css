@@ -17,8 +17,8 @@
   gap: 1.5rem;
   min-height: 100vh;
   justify-content: flex-start;
-  padding-top: 2rem;
-  padding-bottom: 6rem;
+  padding-top: 3.75rem; /* 从2rem增加到3.75rem，向下移动约0.5厘米 */
+  padding-bottom: 2rem; /* 从6rem减少到2rem，因为去掉了底部导航栏 */
 }
 
 /* 钱包概览 */
@@ -276,53 +276,328 @@
   color: #6b7280;
 }
 
-/* 底部导航栏 */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+/* 生态列表 */
+.ecosystem-list {
   background: white;
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-around;
-  padding: 0.75rem 0;
-  z-index: 50;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
 }
 
-.nav-btn {
+.ecosystem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ecosystem-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.ecosystem-items {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+}
+
+.ecosystem-item {
+  display: flex;
   align-items: center;
-  gap: 0.25rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
   transition: all 0.2s ease;
+}
+
+.ecosystem-item:hover {
+  background: #f9fafb;
+}
+
+.ecosystem-icon {
+  width: 48px;
+  height: 48px;
+  background: #fef3c7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.ecosystem-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ecosystem-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.ecosystem-desc {
+  font-size: 0.875rem;
   color: #6b7280;
 }
 
-.nav-btn:hover {
+.mint-btn {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mint-btn:hover {
+  background: #374151;
+  transform: translateY(-1px);
+}
+
+.mint-btn:active {
+  transform: translateY(0);
+}
+
+/* 设置列表 */
+.settings-list {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.settings-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.settings-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.settings-item:hover {
+  background: #f9fafb;
+}
+
+.settings-icon {
+  width: 48px;
+  height: 48px;
+  background: #f3e8ff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.settings-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.settings-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.settings-desc {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.export-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.export-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.export-btn:active {
+  transform: translateY(0);
+}
+
+/* 私钥弹窗样式 */
+.private-key-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.private-key-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  max-width: 90vw;
+  width: 400px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e7eb;
+}
+
+.private-key-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.private-key-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+}
+
+.private-key-modal-close-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.private-key-modal-close-btn:hover {
   background: #f3f4f6;
   color: #000000;
 }
 
-.nav-btn.active {
-  color: #000000;
+.private-key-modal-body {
+  padding: 1.5rem;
 }
 
-.nav-btn span {
-  font-size: 0.75rem;
+.private-key-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.private-key-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+}
+
+.private-key-value {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #000000;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.private-key-warning {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin: 0;
+  line-height: 1.5;
+  padding: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.private-key-modal-footer {
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+}
+
+.private-key-modal-close-button {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.private-key-modal-close-button:hover {
+  background: #374151;
+  transform: translateY(-1px);
+}
+
+.private-key-modal-close-button:active {
+  transform: translateY(0);
 }
 
 /* Powered by 容器 */
 .powered-by-container {
   position: absolute;
-  bottom: 5rem;
+  bottom: 2rem; /* 从5rem调整到2rem，因为去掉了底部导航栏 */
   left: 0;
   right: 0;
   display: flex;
@@ -341,8 +616,8 @@
 @media (max-width: 480px) {
   .dashboard-container {
     padding: 0.75rem;
-    padding-top: 1.5rem;
-    padding-bottom: 6rem;
+    padding-top: 3.25rem; /* 从1.5rem增加到3.25rem，保持向下移动 */
+    padding-bottom: 2rem; /* 从6rem减少到2rem */
   }
   
   .wallet-overview {
@@ -353,15 +628,21 @@
     font-size: 2rem;
   }
   
-  .asset-list {
+  .asset-list,
+  .ecosystem-list,
+  .settings-list {
     padding: 1.25rem;
   }
   
-  .asset-item {
+  .asset-item,
+  .ecosystem-item,
+  .settings-item {
     padding: 0.75rem;
   }
   
-  .asset-icon {
+  .asset-icon,
+  .ecosystem-icon,
+  .settings-icon {
     width: 40px;
     height: 40px;
   }
@@ -369,5 +650,10 @@
   .egoda-badge {
     font-size: 0.5rem;
     padding: 0.2rem 0.4rem;
+  }
+  
+  .mint-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 }
