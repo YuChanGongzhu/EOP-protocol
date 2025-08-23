@@ -1,0 +1,358 @@
+/* 钱包页面样式 */
+
+/* 渐变背景 */
+.bg-gradient-radial {
+  background: radial-gradient(circle, #56f5ca 0%, transparent 70%);
+}
+
+/* 钱包选择容器 */
+.wallet-selection-container {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.wallet-subtitle {
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* 钱包卡片 */
+.wallet-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* 钱包卡片选项 */
+.wallet-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.05s ease;
+  position: relative;
+  text-align: left;
+  width: 100%;
+}
+
+.wallet-card:hover:not(.disabled) {
+  border-color: #56f5ca;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(86, 245, 202, 0.15);
+}
+
+.wallet-card.selected {
+  border-color: #56f5ca;
+  border-width: 2px;
+  background: #f9fafb;
+  box-shadow: 0 0 20px rgba(86, 245, 202, 0.3);
+  animation: selectedGlow 0.6s ease-out;
+}
+
+@keyframes selectedGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(86, 245, 202, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(86, 245, 202, 0.5);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(86, 245, 202, 0.3);
+    transform: scale(1);
+  }
+}
+
+.wallet-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+/* 推荐标签 */
+.recommend-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 卡片图标 */
+.card-icon {
+  width: 48px;
+  height: 48px;
+  background: #000000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.wallet-card.disabled .card-icon {
+  background: #9ca3af;
+}
+
+/* 卡片内容 */
+.card-content {
+  flex: 1;
+  text-align: left;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 0.25rem 0;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.wallet-card.disabled .card-title,
+.wallet-card.disabled .card-subtitle {
+  color: #9ca3af;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.modal-body {
+  margin-bottom: 2rem;
+}
+
+.info-section {
+  margin-bottom: 1.5rem;
+}
+
+.info-section:last-child {
+  margin-bottom: 0;
+}
+
+.info-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 0.75rem 0;
+}
+
+.info-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+}
+
+.modal-close-button {
+  width: 100%;
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-button:hover {
+  background: #374151;
+  transform: translateY(-1px);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background: #374151;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-ghost:hover {
+  background: #f9fafb;
+  color: #000000;
+  border-color: #d1d5db;
+}
+
+/* Powered by 容器 */
+.powered-by-container {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.powered-by-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 工具类 */
+.hidden {
+  display: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .wallet-cards {
+    max-width: 100%;
+  }
+  
+  .wallet-card {
+    padding: 1rem;
+  }
+  
+  .card-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .card-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+    border-radius: 16px;
+    width: 95%;
+  }
+  
+  .modal-title {
+    font-size: 1.25rem;
+  }
+}

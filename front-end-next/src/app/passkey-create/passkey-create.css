@@ -1,0 +1,230 @@
+/* Passkey创建页面样式 */
+
+/* 渐变背景 */
+.bg-gradient-radial {
+  background: radial-gradient(circle, #56f5ca 0%, transparent 70%);
+}
+
+/* Passkey创建容器 */
+.passkey-create-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.passkey-create-card {
+  background: transparent;
+  padding: 3rem;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+/* 头部样式 */
+.passkey-create-header {
+  margin-bottom: 2.5rem;
+}
+
+.passkey-icon {
+  width: 64px;
+  height: 64px;
+  background: #000000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 1.5rem;
+}
+
+.passkey-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+}
+
+.passkey-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 表单样式 */
+.passkey-create-form {
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  color: #000000;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #56f5ca;
+  box-shadow: 0 0 0 3px rgba(86, 245, 202, 0.1);
+}
+
+.input-field:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.input-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+/* 按钮样式 */
+.passkey-create-btn {
+  width: 100%;
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.passkey-create-btn:hover:not(:disabled) {
+  background: #374151;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.passkey-create-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.passkey-back-btn {
+  width: 100%;
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.passkey-back-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  color: #000000;
+  border-color: #d1d5db;
+}
+
+.passkey-back-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 状态显示 */
+.passkey-status {
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.passkey-status.creating {
+  background: rgba(86, 245, 202, 0.1);
+  color: #059669;
+  border: 1px solid rgba(86, 245, 202, 0.2);
+}
+
+.passkey-status.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #059669;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.passkey-status.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Powered by 容器 */
+.powered-by-container {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.powered-by-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .passkey-create-container {
+    padding: 1rem;
+  }
+  
+  .passkey-create-card {
+    padding: 2rem;
+    border-radius: 20px;
+  }
+  
+  .passkey-title {
+    font-size: 1.5rem;
+  }
+  
+  .passkey-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .passkey-icon {
+    width: 56px;
+    height: 56px;
+  }
+}

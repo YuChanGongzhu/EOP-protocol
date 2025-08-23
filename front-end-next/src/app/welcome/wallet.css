@@ -1,0 +1,412 @@
+/* 钱包页面样式 */
+
+/* 动画背景 */
+.animated-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* 网格叠加 */
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(rgba(76, 61, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 61, 255, 0.08) 1px, transparent 1px);
+  background-size: 120px 120px;
+  animation: gridMove 50s infinite linear;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(60px, 60px) rotate(0.5deg);
+  }
+  100% {
+    transform: translate(120px, 120px) rotate(0deg);
+  }
+}
+
+/* 模糊光晕 */
+.blur-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.orb1 {
+  width: 300px;
+  height: 300px;
+  background: rgba(76, 61, 255, 0.3);
+  top: 10%;
+  left: 10%;
+  animation: float 20s infinite ease-in-out;
+}
+
+.orb2 {
+  width: 200px;
+  height: 200px;
+  background: rgba(0, 200, 255, 0.2);
+  top: 60%;
+  left: 20%;
+  animation: float 15s infinite ease-in-out reverse;
+}
+
+.orb3 {
+  width: 350px;
+  height: 350px;
+  background: rgba(255, 0, 128, 0.15);
+  top: 30%;
+  right: 10%;
+  animation: float 25s infinite ease-in-out 5s;
+}
+
+.orb4 {
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 102, 0, 0.2);
+  bottom: 10%;
+  right: 20%;
+  animation: float 18s infinite ease-in-out 2s;
+}
+
+.orb5 {
+  width: 220px;
+  height: 220px;
+  background: rgba(0, 255, 170, 0.15);
+  top: 50%;
+  left: 50%;
+  animation: float 22s infinite ease-in-out 8s;
+}
+
+.orb6 {
+  width: 280px;
+  height: 280px;
+  background: rgba(128, 0, 255, 0.1);
+  bottom: 20%;
+  left: 10%;
+  animation: float 19s infinite ease-in-out 4s;
+}
+
+.orb7 {
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 215, 0, 0.1);
+  top: 15%;
+  right: 15%;
+  animation: float 21s infinite ease-in-out 6s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-20px, 20px);
+  }
+  50% {
+    transform: translate(10px, -15px);
+  }
+  75% {
+    transform: translate(15px, 10px);
+  }
+}
+
+/* 粒子 */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 30%;
+  animation: particle-float 30s infinite linear;
+}
+
+.particle:nth-child(2) {
+  top: 70%;
+  left: 60%;
+  animation: particle-float 25s infinite linear 2s;
+}
+
+.particle:nth-child(3) {
+  top: 40%;
+  left: 80%;
+  animation: particle-float 35s infinite linear 5s;
+}
+
+.particle:nth-child(4) {
+  top: 80%;
+  left: 20%;
+  animation: particle-float 28s infinite linear 8s;
+}
+
+.particle:nth-child(5) {
+  top: 30%;
+  left: 50%;
+  animation: particle-float 32s infinite linear 12s;
+}
+
+.particle:nth-child(6) {
+  top: 60%;
+  left: 40%;
+  animation: particle-float 27s infinite linear 15s;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(100px, -50px) scale(1.5);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(200px, 100px) scale(1);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(100px, 200px) scale(0.8);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+}
+
+/* 几何形状 */
+.geo-shape {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1;
+  opacity: 0.4;
+}
+
+.geo-shape:nth-child(1) {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  top: 15%;
+  left: 25%;
+  transform: rotate(15deg);
+  animation: rotate 30s infinite linear;
+}
+
+.geo-shape:nth-child(2) {
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  bottom: 20%;
+  right: 15%;
+  transform: rotate(45deg);
+  animation: rotate 35s infinite linear reverse;
+}
+
+.geo-shape:nth-child(3) {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  top: 60%;
+  left: 15%;
+  transform: rotate(30deg);
+  animation: rotate 25s infinite linear 5s;
+}
+
+.geo-shape:nth-child(4) {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  top: 25%;
+  right: 25%;
+  transform: rotate(60deg);
+  animation: rotate 28s infinite linear 8s;
+}
+
+.geo-shape:nth-child(5) {
+  width: 180px;
+  height: 180px;
+  border-radius: 14px;
+  bottom: 10%;
+  left: 30%;
+  transform: rotate(75deg);
+  animation: rotate 32s infinite linear 12s;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 钱包选择容器 */
+.wallet-selection-container {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.wallet-subtitle {
+  color: #9CA3AF;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* 钱包网格 */
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+/* 钱包选项 */
+.wallet-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.wallet-option:hover {
+  border-color: #4C3DFF;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 61, 255, 0.15);
+}
+
+.wallet-option.selected {
+  border-color: #4C3DFF;
+  background: rgba(76, 61, 255, 0.1);
+}
+
+/* 热门徽章 */
+.hot-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #EF4444, #F59E0B);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 钱包图标 */
+.wallet-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #4C3DFF, #00D4FF);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #4C3DFF, #00D4FF);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 61, 255, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 61, 255, 0.3);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #9CA3AF;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+/* Powered by 容器 */
+.powered-by-container {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.powered-by-text {
+  color: #9CA3AF;
+  font-size: 0.875rem;
+}
+
+.powered-by-image {
+  height: 1.5rem;
+  width: auto;
+  opacity: 0.8;
+}
+
+/* 工具类 */
+.hidden {
+  display: none;
+}

@@ -1,0 +1,170 @@
+/* 现代简洁设计样式 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义颜色变量 */
+:root {
+  --primary-color: #56f5ca;
+  --text-primary: #000000;
+  --text-secondary: #6b7280;
+  --background: #ffffff;
+  --border-color: #e5e7eb;
+}
+
+/* 基础样式重置 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+/* 渐变背景 */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+}
+
+/* 卡片样式 */
+.card {
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: var(--text-primary);
+  color: var(--background);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #374151;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* 徽章样式 */
+.badge {
+  background-color: var(--primary-color);
+  color: var(--background);
+  border-radius: 9999px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(86, 245, 202, 0.2);
+}
+
+/* 图标容器 */
+.icon-container {
+  background-color: var(--primary-color);
+  color: var(--background);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(86, 245, 202, 0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .text-5xl {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+}
+
+/* 平滑过渡 */
+* {
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* 焦点状态 */
+button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* 加载状态 */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* 悬停效果 */
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 标题出现动画 */
+@keyframes titleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-title-appear {
+  animation: titleAppear 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* 副标题出现动画 */
+@keyframes subtitleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-subtitle-appear {
+  animation: subtitleAppear 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+/* 点号闪烁动画 */
+@keyframes dotBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.animate-dot-blink {
+  animation: dotBlink 2s infinite;
+  animation-delay: 1.5s;
+}

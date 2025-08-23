@@ -1,0 +1,613 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.30;
+
+import "forge-std/Test.sol";
+import "../src/INJDomainNFT.sol";
+
+contract INJDomainNFTTest is Test {
+    INJDomainNFT public domainNFT;
+
+    address public owner;
+    address public user1;
+    address public user2;
+    address public user3;
+
+    string public constant DOMAIN_PREFIX = "alice";
+    string public constant NFC_UID = "04:1a:2b:3c:4d:5e:6f";
+    string public constant METADATA_URI =
+        "https://example.com/metadata/domain.json";
+
+    event DomainNFTMinted(
+        uint256 indexed tokenId,
+        string indexed domainName,
+        address indexed owner,
+        string nfcUID,
+        uint256 registeredAt
+    );
+
+    function setUp() public {
+        owner = address(this);
+        user1 = makeAddr("user1");
+        user2 = makeAddr("user2");
+        user3 = makeAddr("user3");
+
+        domainNFT = new INJDomainNFT();
+    }
+
+    function testConstructor() public {
+        assertEq(domainNFT.name(), "INJ Domain NFT");
+        assertEq(domainNFT.symbol(), "INJD");
+        assertEq(domainNFT.owner(), owner);
+        assertEq(domainNFT.registrationFee(), 0);
+        assertEq(domainNFT.MIN_DOMAIN_LENGTH(), 3);
+        assertEq(domainNFT.MAX_DOMAIN_LENGTH(), 30);
+    }
+
+    function testMintDomainNFT() public {
+        vm.startPrank(user1);
+
+        // 铸造域名NFT
+        uint256 tokenId = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        // 验证tokenId
+        assertEq(tokenId, 1);
+
+        // 验证NFT所有权
+        assertEq(domainNFT.ownerOf(tokenId), user1);
+
+        // 验证域名信息
+        INJDomainNFT.DomainInfo memory domainInfo = domainNFT.domainInfos(
+            tokenId
+        );
+        assertEq(
+            domainInfo.domainName,
+            string(abi.encodePacked(DOMAIN_PREFIX, ".inj"))
+        );
+        assertEq(domainInfo.owner, user1);
+        assertEq(domainInfo.nfcUID, NFC_UID);
+        assertTrue(domainInfo.isActive);
+        assertTrue(domainInfo.registeredAt > 0);
+
+        // 验证映射关系
+        assertEq(
+            domainNFT.domainToTokenId(
+                string(abi.encodePacked(DOMAIN_PREFIX, ".inj"))
+            ),
+            tokenId
+        );
+        assertEq(domainNFT.nfcToTokenId(NFC_UID), tokenId);
+
+        // 验证用户域名列表
+        uint256[] memory userTokenIds = domainNFT.userTokenIds(user1);
+        assertEq(userTokenIds.length, 1);
+        assertEq(userTokenIds[0], tokenId);
+
+        // 验证主域名设置
+        assertEq(domainNFT.primaryDomainTokenId(user1), tokenId);
+
+        vm.stopPrank();
+    }
+
+    function testMintDomainNFTInvalidLength() public {
+        vm.startPrank(user1);
+
+        // 测试过短的域名
+        vm.expectRevert("Domain length invalid");
+        domainNFT.mintDomainNFT{value: 0}("ab", NFC_UID, METADATA_URI);
+
+        // 测试过长的域名
+        string
+            memory longDomain = "thisisareallylongdomainnamethatisexceedingthelimit";
+        vm.expectRevert("Domain length invalid");
+        domainNFT.mintDomainNFT{value: 0}(longDomain, NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+    }
+
+    function testMintDomainNFTInvalidCharacters() public {
+        vm.startPrank(user1);
+
+        // 测试包含大写字母的域名
+        vm.expectRevert("Domain contains invalid characters");
+        domainNFT.mintDomainNFT{value: 0}("Alice", NFC_UID, METADATA_URI);
+
+        // 测试包含特殊字符的域名
+        vm.expectRevert("Domain contains invalid characters");
+        domainNFT.mintDomainNFT{value: 0}("alice@", NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+    }
+
+    function testMintDomainNFTDuplicateDomain() public {
+        vm.startPrank(user1);
+
+        // 第一次铸造
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+
+        // 尝试铸造相同域名
+        vm.expectRevert("Domain already registered");
+        domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            "04:2a:3b:4c:5d:6e:7f",
+            METADATA_URI
+        );
+
+        vm.stopPrank();
+    }
+
+    function testMintDomainNFTDuplicateNFC() public {
+        vm.startPrank(user1);
+
+        // 第一次铸造
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+
+        // 尝试使用相同的NFC UID
+        vm.expectRevert("NFC already bound to domain");
+        domainNFT.mintDomainNFT{value: 0}("bob", NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+    }
+
+    function testMintDomainNFTInsufficientFee() public {
+        // 设置注册费用
+        domainNFT.setRegistrationFee(0.1 ether);
+
+        vm.startPrank(user1);
+
+        vm.expectRevert("Insufficient registration fee");
+        domainNFT.mintDomainNFT{value: 0.05 ether}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        vm.stopPrank();
+    }
+
+    function testUnbindAndTransferDomain() public {
+        vm.startPrank(user1);
+
+        // 铸造域名NFT
+        uint256 tokenId = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        // 解绑并转移
+        domainNFT.unbindAndTransferDomain(NFC_UID, user2);
+
+        // 验证所有权转移
+        assertEq(domainNFT.ownerOf(tokenId), user2);
+
+        // 验证NFC绑定已清除
+        assertEq(domainNFT.nfcToTokenId(NFC_UID), 0);
+
+        // 验证域名信息更新
+        INJDomainNFT.DomainInfo memory domainInfo = domainNFT.domainInfos(
+            tokenId
+        );
+        assertEq(domainInfo.owner, user2);
+        assertEq(domainInfo.nfcUID, "");
+
+        // 验证用户域名列表更新
+        uint256[] memory user1TokenIds = domainNFT.userTokenIds(user1);
+        uint256[] memory user2TokenIds = domainNFT.userTokenIds(user2);
+
+        assertEq(user1TokenIds.length, 0);
+        assertEq(user2TokenIds.length, 1);
+        assertEq(user2TokenIds[0], tokenId);
+
+        vm.stopPrank();
+    }
+
+    function testUnbindAndTransferDomainNotOwner() public {
+        vm.startPrank(user1);
+
+        // 铸造域名NFT
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+
+        // user2尝试转移user1的域名
+        vm.expectRevert("Not the domain owner");
+        domainNFT.unbindAndTransferDomain(NFC_UID, user3);
+
+        vm.stopPrank();
+    }
+
+    function testUnbindAndTransferDomainNotBound() public {
+        vm.startPrank(user1);
+
+        vm.expectRevert("NFC not bound to domain");
+        domainNFT.unbindAndTransferDomain("nonexistent", user2);
+
+        vm.stopPrank();
+    }
+
+    function testSetPrimaryDomain() public {
+        vm.startPrank(user1);
+
+        // 铸造第一个域名
+        uint256 tokenId1 = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        // 铸造第二个域名
+        uint256 tokenId2 = domainNFT.mintDomainNFT{value: 0}(
+            "bob",
+            "04:2a:3b:4c:5d:6e:7f",
+            METADATA_URI
+        );
+
+        // 设置第二个域名为主域名
+        domainNFT.setPrimaryDomain(tokenId2);
+
+        // 验证主域名更新
+        assertEq(domainNFT.primaryDomainTokenId(user1), tokenId2);
+
+        vm.stopPrank();
+    }
+
+    function testSetPrimaryDomainNotOwner() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        uint256 tokenId = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+
+        // user2尝试设置user1的域名为主域名
+        vm.expectRevert("Not the domain owner");
+        domainNFT.setPrimaryDomain(tokenId);
+
+        vm.stopPrank();
+    }
+
+    function testSetPrimaryDomainNonExistent() public {
+        vm.startPrank(user1);
+
+        vm.expectRevert("Domain does not exist");
+        domainNFT.setPrimaryDomain(999);
+
+        vm.stopPrank();
+    }
+
+    function testGetUserDomains() public {
+        vm.startPrank(user1);
+
+        // 铸造多个域名
+        uint256 tokenId1 = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+        uint256 tokenId2 = domainNFT.mintDomainNFT{value: 0}(
+            "bob",
+            "04:2a:3b:4c:5d:6e:7f",
+            METADATA_URI
+        );
+        uint256 tokenId3 = domainNFT.mintDomainNFT{value: 0}(
+            "charlie",
+            "04:3a:4b:5c:6d:7e:8f",
+            METADATA_URI
+        );
+
+        // 获取用户域名列表
+        uint256[] memory userTokenIds = domainNFT.getUserDomains(user1);
+
+        assertEq(userTokenIds.length, 3);
+        assertEq(userTokenIds[0], tokenId1);
+        assertEq(userTokenIds[1], tokenId2);
+        assertEq(userTokenIds[2], tokenId3);
+
+        vm.stopPrank();
+    }
+
+    function testGetDomainInfo() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        uint256 tokenId = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        // 获取域名信息
+        INJDomainNFT.DomainInfo memory domainInfo = domainNFT.getDomainInfo(
+            tokenId
+        );
+
+        assertEq(
+            domainInfo.domainName,
+            string(abi.encodePacked(DOMAIN_PREFIX, ".inj"))
+        );
+        assertEq(domainInfo.owner, user1);
+        assertEq(domainInfo.nfcUID, NFC_UID);
+        assertTrue(domainInfo.isActive);
+        assertTrue(domainInfo.registeredAt > 0);
+
+        vm.stopPrank();
+    }
+
+    function testGetDomainInfoNonExistent() public {
+        vm.expectRevert("Domain does not exist");
+        domainNFT.getDomainInfo(999);
+    }
+
+    function testIsDomainRegistered() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        // 验证域名已注册
+        assertTrue(
+            domainNFT.isDomainRegistered(
+                string(abi.encodePacked(DOMAIN_PREFIX, ".inj"))
+            )
+        );
+
+        // 验证未注册的域名
+        assertFalse(domainNFT.isDomainRegistered("bob.inj"));
+
+        vm.stopPrank();
+    }
+
+    function testGetDomainOwner() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        // 获取域名所有者
+        address domainOwner = domainNFT.getDomainOwner(
+            string(abi.encodePacked(DOMAIN_PREFIX, ".inj"))
+        );
+        assertEq(domainOwner, user1);
+
+        vm.stopPrank();
+    }
+
+    function testGetDomainOwnerNonExistent() public {
+        address domainOwner = domainNFT.getDomainOwner("nonexistent.inj");
+        assertEq(domainOwner, address(0));
+    }
+
+    function testIsNFCBound() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        // 验证NFC已绑定
+        assertTrue(domainNFT.isNFCBound(NFC_UID));
+
+        // 验证未绑定的NFC
+        assertFalse(domainNFT.isNFCBound("nonexistent"));
+
+        vm.stopPrank();
+    }
+
+    function testGetNFCBoundDomain() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        uint256 tokenId = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        // 获取NFC绑定的域名
+        uint256 boundTokenId = domainNFT.getNFCBoundDomain(NFC_UID);
+        assertEq(boundTokenId, tokenId);
+
+        vm.stopPrank();
+    }
+
+    function testGetNFCBoundDomainNotBound() public {
+        uint256 boundTokenId = domainNFT.getNFCBoundDomain("nonexistent");
+        assertEq(boundTokenId, 0);
+    }
+
+    function testSetRegistrationFee() public {
+        uint256 newFee = 0.1 ether;
+
+        domainNFT.setRegistrationFee(newFee);
+        assertEq(domainNFT.registrationFee(), newFee);
+    }
+
+    function testSetRegistrationFeeNotOwner() public {
+        vm.startPrank(user1);
+
+        vm.expectRevert();
+        domainNFT.setRegistrationFee(0.1 ether);
+
+        vm.stopPrank();
+    }
+
+    function testWithdraw() public {
+        // 设置注册费用
+        domainNFT.setRegistrationFee(0.1 ether);
+
+        vm.startPrank(user1);
+
+        // 铸造域名产生费用
+        domainNFT.mintDomainNFT{value: 0.1 ether}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        vm.stopPrank();
+
+        uint256 initialBalance = owner.balance;
+
+        // 提取费用
+        domainNFT.withdraw();
+
+        assertEq(owner.balance, initialBalance + 0.1 ether);
+    }
+
+    function testWithdrawNotOwner() public {
+        vm.startPrank(user1);
+
+        vm.expectRevert();
+        domainNFT.withdraw();
+
+        vm.stopPrank();
+    }
+
+    function testEvents() public {
+        vm.startPrank(user1);
+
+        // 监听事件
+        vm.expectEmit(true, true, true, true);
+        emit DomainNFTMinted(
+            1,
+            string(abi.encodePacked(DOMAIN_PREFIX, ".inj")),
+            user1,
+            NFC_UID,
+            block.timestamp
+        );
+
+        domainNFT.mintDomainNFT{value: 0}(DOMAIN_PREFIX, NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+    }
+
+    function testMultipleUsers() public {
+        // user1铸造域名
+        vm.startPrank(user1);
+        uint256 tokenId1 = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+        vm.stopPrank();
+
+        // user2铸造域名
+        vm.startPrank(user2);
+        uint256 tokenId2 = domainNFT.mintDomainNFT{value: 0}(
+            "bob",
+            "04:2a:3b:4c:5d:6e:7f",
+            METADATA_URI
+        );
+        vm.stopPrank();
+
+        // user3铸造域名
+        vm.startPrank(user3);
+        uint256 tokenId3 = domainNFT.mintDomainNFT{value: 0}(
+            "charlie",
+            "04:3a:4b:5c:6d:7e:8f",
+            METADATA_URI
+        );
+        vm.stopPrank();
+
+        // 验证各自的所有权
+        assertEq(domainNFT.ownerOf(tokenId1), user1);
+        assertEq(domainNFT.ownerOf(tokenId2), user2);
+        assertEq(domainNFT.ownerOf(tokenId3), user3);
+
+        // 验证用户域名列表
+        uint256[] memory user1TokenIds = domainNFT.getUserDomains(user1);
+        uint256[] memory user2TokenIds = domainNFT.getUserDomains(user2);
+        uint256[] memory user3TokenIds = domainNFT.getUserDomains(user3);
+
+        assertEq(user1TokenIds.length, 1);
+        assertEq(user2TokenIds.length, 1);
+        assertEq(user3TokenIds.length, 1);
+        assertEq(user1TokenIds[0], tokenId1);
+        assertEq(user2TokenIds[0], tokenId2);
+        assertEq(user3TokenIds[0], tokenId3);
+    }
+
+    function testERC721Compatibility() public {
+        vm.startPrank(user1);
+
+        // 铸造域名
+        uint256 tokenId = domainNFT.mintDomainNFT{value: 0}(
+            DOMAIN_PREFIX,
+            NFC_UID,
+            METADATA_URI
+        );
+
+        // 测试ERC721标准函数
+        assertEq(domainNFT.ownerOf(tokenId), user1);
+        assertEq(domainNFT.balanceOf(user1), 1);
+
+        // 测试tokenURI
+        assertEq(domainNFT.tokenURI(tokenId), METADATA_URI);
+
+        vm.stopPrank();
+    }
+
+    function testDomainValidation() public {
+        vm.startPrank(user1);
+
+        // 测试有效域名
+        domainNFT.mintDomainNFT{value: 0}("valid", NFC_UID, METADATA_URI);
+
+        // 测试包含连字符的域名
+        domainNFT.mintDomainNFT{value: 0}(
+            "my-domain",
+            "04:2a:3b:4c:5d:6e:7f",
+            METADATA_URI
+        );
+
+        // 测试数字域名
+        domainNFT.mintDomainNFT{value: 0}(
+            "domain123",
+            "04:3a:4b:5c:6d:7e:8f",
+            METADATA_URI
+        );
+
+        vm.stopPrank();
+    }
+
+    function testDomainValidationInvalid() public {
+        vm.startPrank(user1);
+
+        // 测试以连字符开头的域名
+        vm.expectRevert("Domain contains invalid characters");
+        domainNFT.mintDomainNFT{value: 0}("-invalid", NFC_UID, METADATA_URI);
+
+        // 测试以连字符结尾的域名
+        vm.expectRevert("Domain contains invalid characters");
+        domainNFT.mintDomainNFT{value: 0}("invalid-", NFC_UID, METADATA_URI);
+
+        // 测试连续连字符
+        vm.expectRevert("Domain contains invalid characters");
+        domainNFT.mintDomainNFT{value: 0}("in--valid", NFC_UID, METADATA_URI);
+
+        vm.stopPrank();
+    }
+}

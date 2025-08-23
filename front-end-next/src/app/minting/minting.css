@@ -1,0 +1,464 @@
+/* 铸造页面样式 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* 动画背景 */
+.animated-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.blur-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  animation: float 20s infinite ease-in-out;
+}
+
+.orb1 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.8) 0%, rgba(0, 102, 255, 0) 70%);
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.orb2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 0, 128, 0.6) 0%, rgba(255, 0, 128, 0) 70%);
+  bottom: 10%;
+  right: 10%;
+  animation-delay: -5s;
+}
+
+.orb3 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(0, 204, 255, 0.7) 0%, rgba(0, 204, 255, 0) 70%);
+  top: 40%;
+  right: 20%;
+  animation-delay: -10s;
+}
+
+.orb4 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(255, 102, 0, 0.5) 0%, rgba(255, 102, 0, 0) 70%);
+  bottom: 30%;
+  left: 20%;
+  animation-delay: -15s;
+}
+
+.orb5 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(153, 0, 255, 0.6) 0%, rgba(153, 0, 255, 0) 70%);
+  top: 60%;
+  left: 40%;
+  animation-delay: -7s;
+}
+
+.orb6 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(0, 255, 128, 0.5) 0%, rgba(0, 255, 128, 0) 70%);
+  top: 20%;
+  right: 40%;
+  animation-delay: -12s;
+}
+
+.orb7 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(255, 204, 0, 0.6) 0%, rgba(255, 204, 0, 0) 70%);
+  bottom: 15%;
+  right: 30%;
+  animation-delay: -18s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-20px, 20px);
+  }
+  50% {
+    transform: translate(20px, -20px);
+  }
+  75% {
+    transform: translate(20px, 20px);
+  }
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: particle-float 15s infinite linear;
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 30%;
+  animation-duration: 20s;
+}
+
+.particle:nth-child(2) {
+  top: 70%;
+  left: 60%;
+  animation-duration: 25s;
+}
+
+.particle:nth-child(3) {
+  top: 40%;
+  left: 80%;
+  animation-duration: 18s;
+}
+
+.particle:nth-child(4) {
+  top: 80%;
+  left: 20%;
+  animation-duration: 22s;
+}
+
+.particle:nth-child(5) {
+  top: 30%;
+  left: 50%;
+  animation-duration: 19s;
+}
+
+.particle:nth-child(6) {
+  top: 60%;
+  left: 40%;
+  animation-duration: 21s;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(50px, -30px) scale(1.5);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(100px, 0) scale(1);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(50px, 30px) scale(0.8);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+}
+
+.geo-shape {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: rotate 30s infinite linear;
+}
+
+.geo-shape:nth-child(1) {
+  width: 200px;
+  height: 200px;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  top: 10%;
+  left: 20%;
+  animation-duration: 40s;
+}
+
+.geo-shape:nth-child(2) {
+  width: 300px;
+  height: 300px;
+  border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%;
+  bottom: 10%;
+  right: 20%;
+  animation-duration: 35s;
+}
+
+.geo-shape:nth-child(3) {
+  width: 150px;
+  height: 150px;
+  border-radius: 80% 20% 50% 50% / 50% 50% 50% 50%;
+  top: 40%;
+  right: 30%;
+  animation-duration: 45s;
+}
+
+.geo-shape:nth-child(4) {
+  width: 250px;
+  height: 250px;
+  border-radius: 30% 70% 20% 80% / 50% 50% 50% 50%;
+  bottom: 30%;
+  left: 30%;
+  animation-duration: 50s;
+}
+
+.geo-shape:nth-child(5) {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  top: 60%;
+  left: 10%;
+  animation-duration: 55s;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: 1;
+}
+
+/* 铸造容器 */
+.minting-container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  color: white;
+}
+
+.minting-card {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: fade-in 0.5s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.minting-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: white;
+}
+
+.emoji-fade-in {
+  display: inline-block;
+  animation: emoji-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes emoji-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 域名输入 */
+.minting-input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.minting-input-prefix,
+.minting-input-suffix {
+  padding: 0.75rem 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.875rem;
+}
+
+.minting-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.75rem;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+.minting-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 按钮样式 */
+.minting-check-btn {
+  width: 100%;
+  background: rgba(59, 130, 246, 0.8);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
+}
+
+.minting-check-btn:hover {
+  background: rgba(59, 130, 246, 1);
+}
+
+.minting-check-btn:disabled {
+  background: rgba(59, 130, 246, 0.4);
+  cursor: not-allowed;
+}
+
+.minting-feedback {
+  text-align: center;
+}
+
+.minting-mint-btn {
+  background: rgba(16, 185, 129, 0.8);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+}
+
+.minting-mint-btn:hover {
+  background: rgba(16, 185, 129, 1);
+}
+
+.minting-mint-btn-disabled {
+  background: rgba(16, 185, 129, 0.4);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.minting-fee-note {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.minting-error {
+  color: #ef4444;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* 铸造步骤 */
+#minting-step-minting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 200px;
+}
+
+.minting-spinner {
+  margin-bottom: 1.5rem;
+  animation: spin 2s infinite linear;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.minting-status {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+/* Powered by */
+.powered-by-container {
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  opacity: 0.7;
+}
+
+.powered-by-text {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-right: 0.5rem;
+}
+
+.powered-by-image {
+  height: 20px;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .minting-card {
+    padding: 1.5rem;
+  }
+  
+  .minting-title {
+    font-size: 1.25rem;
+  }
+}

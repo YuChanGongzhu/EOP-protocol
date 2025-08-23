@@ -1,0 +1,373 @@
+/* Dashboard页面样式 */
+
+/* 渐变背景 */
+.bg-gradient-radial {
+  background: radial-gradient(circle, #56f5ca 0%, transparent 70%);
+}
+
+.dashboard-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 100vh;
+  justify-content: flex-start;
+  padding-top: 2rem;
+  padding-bottom: 6rem;
+}
+
+/* 钱包概览 */
+.wallet-overview {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.wallet-header {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wallet-icon {
+  width: 40px;
+  height: 40px;
+  background: #000000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.wallet-details {
+  flex: 1;
+}
+
+.wallet-name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 0.25rem;
+}
+
+.wallet-address {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.address-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: #f3f4f6;
+  color: #000000;
+}
+
+/* Egoda标签 */
+.egoda-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #000000;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 主余额显示 */
+.main-balance {
+  margin-bottom: 1.5rem;
+}
+
+.balance-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.balance-change {
+  font-size: 0.875rem;
+  color: #059669;
+  font-weight: 500;
+}
+
+/* 资产分类标签 */
+.asset-tabs {
+  display: flex;
+  background: white;
+  border-radius: 16px;
+  padding: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: #000000;
+  color: white;
+}
+
+.tab-btn:hover:not(.active) {
+  background: #f3f4f6;
+  color: #000000;
+}
+
+/* 资产列表 */
+.asset-list {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.asset-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.asset-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.asset-total {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+  background: #f3f4f6;
+  color: #000000;
+}
+
+/* 资产项目 */
+.asset-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.asset-item:hover {
+  background: #f9fafb;
+}
+
+.asset-icon {
+  width: 48px;
+  height: 48px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  flex-shrink: 0;
+}
+
+.asset-icon.eth {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.asset-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.asset-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.asset-price {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.asset-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  text-align: right;
+}
+
+.balance-amount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.balance-value {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* 底部导航栏 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem 0;
+  z-index: 50;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.nav-btn:hover {
+  background: #f3f4f6;
+  color: #000000;
+}
+
+.nav-btn.active {
+  color: #000000;
+}
+
+.nav-btn span {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Powered by 容器 */
+.powered-by-container {
+  position: absolute;
+  bottom: 5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.powered-by-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 0.75rem;
+    padding-top: 1.5rem;
+    padding-bottom: 6rem;
+  }
+  
+  .wallet-overview {
+    padding: 1.25rem;
+  }
+  
+  .balance-amount {
+    font-size: 2rem;
+  }
+  
+  .asset-list {
+    padding: 1.25rem;
+  }
+  
+  .asset-item {
+    padding: 0.75rem;
+  }
+  
+  .asset-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .egoda-badge {
+    font-size: 0.5rem;
+    padding: 0.2rem 0.4rem;
+  }
+}

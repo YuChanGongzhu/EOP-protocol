@@ -1,0 +1,110 @@
+services:
+  # 前端服务 - Nginx
+  frontend-next:
+    build:
+      context: ./front-end-next
+      dockerfile: Dockerfile
+    container_name: injective-pass-frontend-next
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+    volumes:
+      - ./front-end-next:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - injective-pass
+
+  # 后端服务
+  backend:
+    build:
+      context: ./nfc-wallet-backend
+      dockerfile: Dockerfile
+    container_name: injective-pass-backend
+    ports:
+      - "8080:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://nfc_user:secure_password_123@postgres:5432/nfc_wallet?schema=public
+      - REDIS_URL=redis://redis:6379
+      - AES_ENCRYPTION_KEY=8ae40a4aa398d775f6b3ff48079003f45d1c90369f331defa1ea9f79ab85b759
+      - JWT_SECRET=DeF9z3wcr88RtKI8bSVhs8wZWNYZPK7OL6/sx2WhSxU=
+      - API_KEY_PREFIX=nfc_wallet_
+      - INJECTIVE_RPC_URL=https://k8s.testnet.json-rpc.injective.network/
+      - INJECTIVE_CHAIN_ID=1439
+      - CONTRACT_PRIVATE_KEY=adbac67afad51760f4049e3ce2c32fcf0cb630f62f9f011290bb87a975171f67
+      - BLOCK_EXPLORER_URL=https://testnet.blockscout.injective.network/
+      - INITIAL_FUNDING_AMOUNT=0.1
+      - DEFAULT_CAT_NAME_PREFIX=InjCat
+      - DEFAULT_CAT_DESCRIPTION=A unique cat NFT for Injective Pass holder
+      - NFC_REGISTRY_ADDRESS=0x775D0D30dc990b8068768CCE58ad47ff167700cf
+      - DOMAIN_REGISTRY_ADDRESS=0xf978481B334ba5572717c528ba730EF4A12DA191
+      - CAT_NFT_ADDRESS=0x049B99fc53a39e8eF6DC725EBA32f0FCd7053c22
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - injective-pass
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        sleep 5 &&
+        npx prisma db push &&
+        npm run start:prod
+      "
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: injective-pass-postgres
+    environment:
+      POSTGRES_DB: nfc_wallet
+      POSTGRES_USER: nfc_user
+      POSTGRES_PASSWORD: secure_password_123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - injective-pass
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U nfc_user -d nfc_wallet" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: injective-pass-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - injective-pass
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  injective-pass:
+    driver: bridge

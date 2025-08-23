@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: nfc_wallet_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nfc_wallet
+      POSTGRES_USER: nfc_user
+      POSTGRES_PASSWORD: secure_password_123
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U nfc_user -d nfc_wallet" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis缓存（可选）
+  redis:
+    image: redis:7-alpine
+    container_name: nfc_wallet_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis_password_123
+    volumes:
+      - redis_data:/data
+
+  # NFC钱包后端API
+  api:
+    build: .
+    container_name: nfc_wallet_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      DATABASE_URL: "postgresql://nfc_user:secure_password_123@postgres:5432/nfc_wallet?schema=public"
+      AES_ENCRYPTION_KEY: "8ae40a4aa398d775f6b3ff48079003f45d1c90369f331defa1ea9f79ab85b759"
+      JWT_SECRET: "DeF9z3wcr88RtKI8bSVhs8wZWNYZPK7OL6/sx2WhSxU="
+      API_KEY_PREFIX: "nfc_wallet_"
+      INJECTIVE_RPC_URL: "https://k8s.testnet.json-rpc.injective.network/"
+      INJECTIVE_CHAIN_ID: "1439"
+      CONTRACT_PRIVATE_KEY: "adbac67afad51760f4049e3ce2c32fcf0cb630f62f9f011290bb87a975171f67"
+      BLOCK_EXPLORER_URL: "https://testnet.blockscout.injective.network/"
+      INITIAL_FUNDING_AMOUNT: "0.1"
+      DEFAULT_CAT_NAME_PREFIX: "InjCat"
+      DEFAULT_CAT_DESCRIPTION: "A unique cat NFT for Injective Pass holder"
+      NFC_REGISTRY_ADDRESS: "0x775D0D30dc990b8068768CCE58ad47ff167700cf"
+      DOMAIN_REGISTRY_ADDRESS: "0xf978481B334ba5572717c528ba730EF4A12DA191"
+      CAT_NFT_ADDRESS: "0x049B99fc53a39e8eF6DC725EBA32f0FCd7053c22"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/nfc/stats" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx反向代理（生产环境）
+  nginx:
+    image: nginx:alpine
+    container_name: nfc_wallet_nginx
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8001:80"
+      - "8443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    environment:
+      - NGINX_ENTRYPOINT_QUIET_LOGS=1
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  nginx_logs:
+    driver: local

@@ -1,0 +1,5727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Injective Pass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <style>
+    /* --- Base Styles & Variables --- */
+    :root {
+      /* Light Theme (Default) */
+      --bg-color: #FAFBFC;
+      --primary-text: #1F2937;
+      --secondary-text: #6B7280;
+      --muted-text: #9CA3AF;
+
+      --blue-light: #4c3dff;
+      --blue-dark: #4338ca;
+      --blue-accent: #6366f1;
+
+      --teal-light: #14B8A6;
+      --teal-dark: #0D9488;
+      --teal-accent: #10b981;
+
+      --red-light: #F87171;
+      --red-accent: #ef4444;
+
+      --purple-accent: #8b5cf6;
+      --orange-accent: #f97316;
+      --pink-accent: #ec4899;
+      --yellow-accent: #eab308;
+
+      --surface: rgba(255, 255, 255, 0.95);
+      --surface-muted: rgba(76, 61, 255, 0.05);
+      --surface-border: rgba(76, 61, 255, 0.1);
+      --glass: rgba(255, 255, 255, 0.9);
+      --glass-border: rgba(76, 61, 255, 0.15);
+
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --card-border: rgba(76, 61, 255, 0.08);
+
+      --font-family: 'Inter', sans-serif;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-color: #000000;
+      --primary-text: #FFFFFF;
+      --secondary-text: #9CA3AF;
+      --muted-text: #6B7280;
+
+      --surface: rgba(31, 41, 55, 0.95);
+      --surface-muted: rgba(76, 61, 255, 0.08);
+      --surface-border: rgba(76, 61, 255, 0.15);
+      --glass: rgba(31, 41, 55, 0.9);
+      --glass-border: rgba(76, 61, 255, 0.2);
+
+      --card-bg: rgba(17, 24, 39, 0.8);
+      --card-border: rgba(76, 61, 255, 0.12);
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg-color);
+      color: var(--primary-text);
+      overflow-x: hidden;
+      overflow-y: auto;
+      min-height: 100vh;
+      width: 100vw;
+      /* Android优化 */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    /* --- Language Toggle --- */
+    .lang-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 0.375rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      font-size: 0.875rem;
+      color: var(--primary-text);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lang-toggle:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(76, 61, 255, 0.2);
+    }
+
+    .lang-toggle.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .lang-toggle.disabled:hover {
+      background: var(--card-bg);
+      border-color: var(--card-border);
+      transform: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- Theme Toggle --- */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 3.75rem;
+      z-index: 100;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 0.375rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(76, 61, 255, 0.2);
+    }
+
+    .theme-toggle svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--primary-text);
+    }
+
+    /* --- Animated Background --- */
+    .animated-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #cbd5e1 75%, #94a3b8 100%);
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="dark"] .animated-background {
+      background: linear-gradient(135deg, #000000 0%, #0a0a0a 25%, #1a1a1a 50%, #0f0f23 75%, #1a1a2e 100%);
+    }
+
+    .blur-orb {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(120px);
+      animation: float 25s infinite ease-in-out;
+      opacity: 0.85;
+    }
+
+    .orb1 {
+      top: -20%;
+      left: -20%;
+      height: 40%;
+      width: 40%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.3), rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2));
+      animation: float 30s infinite ease-in-out;
+    }
+
+    .orb2 {
+      bottom: -20%;
+      right: -20%;
+      height: 45%;
+      width: 45%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.25), rgba(16, 185, 129, 0.3), rgba(59, 130, 246, 0.2));
+      animation: float 35s infinite ease-in-out reverse;
+    }
+
+    .orb3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      height: 30%;
+      width: 30%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.2), rgba(236, 72, 153, 0.15), rgba(245, 158, 11, 0.1));
+      animation: float 40s infinite ease-in-out;
+    }
+
+    .orb4 {
+      top: 20%;
+      right: 15%;
+      height: 25%;
+      width: 25%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.28), rgba(34, 197, 94, 0.22), rgba(6, 182, 212, 0.15));
+      animation: float 28s infinite ease-in-out;
+    }
+
+    .orb5 {
+      bottom: 30%;
+      left: 15%;
+      height: 22%;
+      width: 22%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.25), rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.15));
+      animation: float 32s infinite ease-in-out reverse;
+    }
+
+    .orb6 {
+      top: 70%;
+      right: 40%;
+      height: 18%;
+      width: 18%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.22), rgba(16, 185, 129, 0.18), rgba(59, 130, 246, 0.12));
+      animation: float 26s infinite ease-in-out;
+    }
+
+    .orb7 {
+      top: 15%;
+      left: 60%;
+      height: 20%;
+      width: 20%;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.25), rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.15));
+      animation: float 38s infinite ease-in-out reverse;
+    }
+
+    /* Floating particles */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: particleFloat 8s infinite ease-in-out;
+      box-shadow: 0 0 12px rgba(76, 61, 255, 0.4);
+    }
+
+    .particle:nth-child(8) {
+      top: 15%;
+      left: 25%;
+      animation-delay: 0s;
+      width: 5px;
+      height: 5px;
+      background: linear-gradient(45deg, rgba(76, 61, 255, 0.9), rgba(99, 102, 241, 0.7));
+      box-shadow: 0 0 15px rgba(76, 61, 255, 0.6);
+    }
+
+    .particle:nth-child(9) {
+      top: 35%;
+      left: 75%;
+      animation-delay: 2.5s;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, rgba(16, 185, 129, 0.9), rgba(34, 197, 94, 0.7));
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    }
+
+    .particle:nth-child(10) {
+      top: 65%;
+      left: 15%;
+      animation-delay: 5s;
+      width: 6px;
+      height: 6px;
+      background: linear-gradient(45deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.7));
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.6);
+    }
+
+    .particle:nth-child(11) {
+      top: 85%;
+      left: 65%;
+      animation-delay: 7.5s;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, rgba(236, 72, 153, 0.9), rgba(244, 63, 94, 0.7));
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.6);
+    }
+
+    .particle:nth-child(12) {
+      top: 45%;
+      left: 55%;
+      animation-delay: 10s;
+      width: 5px;
+      height: 5px;
+      background: linear-gradient(45deg, rgba(245, 158, 11, 0.9), rgba(251, 191, 36, 0.7));
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+    }
+
+    .particle:nth-child(13) {
+      top: 75%;
+      left: 35%;
+      animation-delay: 12.5s;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, rgba(59, 130, 246, 0.9), rgba(96, 165, 250, 0.7));
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+    }
+
+    .particle:nth-child(14) {
+      top: 25%;
+      left: 45%;
+      animation-delay: 15s;
+      width: 5px;
+      height: 5px;
+      background: linear-gradient(45deg, rgba(168, 85, 247, 0.9), rgba(196, 181, 253, 0.7));
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+    }
+
+    .particle:nth-child(15) {
+      top: 95%;
+      left: 45%;
+      animation-delay: 17.5s;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, rgba(6, 182, 212, 0.9), rgba(34, 211, 238, 0.7));
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      25% {
+        transform: translate(10vw, -10vh) rotate(90deg);
+      }
+
+      50% {
+        transform: translate(-8vw, 15vh) rotate(180deg);
+      }
+
+      75% {
+        transform: translate(12vw, 8vh) rotate(270deg);
+      }
+    }
+
+
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes particleFloat {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      20% {
+        opacity: 0.8;
+        transform: scale(1);
+      }
+
+      80% {
+        opacity: 0.8;
+        transform: scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+    }
+
+    /* Grid pattern overlay */
+    .grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(76, 61, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(76, 61, 255, 0.08) 1px, transparent 1px);
+      background-size: 120px 120px;
+      animation: gridMove 50s infinite linear;
+      opacity: 0.95;
+    }
+
+    @keyframes gridMove {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      50% {
+        transform: translate(60px, 60px) rotate(0.5deg);
+      }
+
+      100% {
+        transform: translate(120px, 120px) rotate(0deg);
+      }
+    }
+
+    /* Decorative geometric shapes */
+    .geo-shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+      animation: geoFloat 20s infinite ease-in-out;
+    }
+
+    .geo-shape:nth-child(16) {
+      top: 10%;
+      left: 10%;
+      width: 20px;
+      height: 20px;
+      background: var(--teal-accent);
+      animation-delay: 0s;
+    }
+
+    .geo-shape:nth-child(17) {
+      top: 80%;
+      right: 15%;
+      width: 15px;
+      height: 15px;
+      background: var(--purple-accent);
+      animation-delay: 5s;
+    }
+
+    .geo-shape:nth-child(18) {
+      top: 60%;
+      left: 80%;
+      width: 25px;
+      height: 25px;
+      background: var(--orange-accent);
+      animation-delay: 10s;
+    }
+
+    .geo-shape:nth-child(19) {
+      top: 30%;
+      right: 30%;
+      width: 12px;
+      height: 12px;
+      background: var(--pink-accent);
+      animation-delay: 15s;
+    }
+
+    .geo-shape:nth-child(20) {
+      bottom: 20%;
+      left: 60%;
+      width: 18px;
+      height: 18px;
+      background: var(--yellow-accent);
+      animation-delay: 20s;
+    }
+
+    @keyframes geoFloat {
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.1;
+      }
+
+      25% {
+        transform: translateY(-20px) rotate(90deg);
+        opacity: 0.2;
+      }
+
+      50% {
+        transform: translateY(-10px) rotate(180deg);
+        opacity: 0.15;
+      }
+
+      75% {
+        transform: translateY(-30px) rotate(270deg);
+        opacity: 0.25;
+      }
+    }
+
+    /* Wallet dropdown hover effects */
+    .dropdown-item:hover {
+      background-color: var(--surface-muted);
+    }
+
+    #wallet-address-display:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+
+    /* --- Screen Management --- */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 100vh;
+      padding: 0;
+      box-sizing: border-box;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in-out;
+      background: transparent;
+      overflow-y: auto;
+      overflow-x: hidden;
+      /* Android优化 */
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: opacity;
+    }
+
+    .screen.active {
+      display: flex;
+      /* Android优化：减少闪烁 */
+      opacity: 1;
+      transform: none;
+      -webkit-transform: none;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+        -webkit-transform: scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+        -webkit-transform: scale(1);
+      }
+    }
+
+    /* Android设备使用更简单的动画 */
+    .android-device .screen {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      -webkit-transform: none;
+    }
+
+    .android-device .screen.active {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      -webkit-transform: none;
+    }
+
+    /* --- Header Banner --- */
+    .header-banner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, var(--teal-accent), var(--blue-accent));
+      color: white;
+      padding: 0.75rem 1rem;
+      z-index: 10;
+    }
+
+    .banner-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .banner-icon {
+      font-size: 1.25rem;
+    }
+
+    .banner-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .banner-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0;
+      margin-left: auto;
+    }
+
+    /* --- Welcome Section --- */
+    .welcome-section {
+      margin-top: 4rem;
+      text-align: center;
+    }
+
+    /* --- Price Chart Section --- */
+    .price-chart-section {
+      margin: 2rem auto;
+      max-width: 400px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .chart-header h3 {
+      margin: 0;
+      color: var(--primary-text);
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .time-period {
+      color: var(--secondary-text);
+      font-size: 0.875rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 100px;
+    }
+
+    .price-line {
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(90deg, var(--teal-accent), var(--blue-accent));
+      border-radius: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .price-line::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .price-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .price-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-text);
+    }
+
+    .price-change {
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .price-change.positive {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--teal-accent);
+    }
+
+    .price-change.negative {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--red-accent);
+    }
+
+    /* --- Stats Grid --- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem auto;
+      max-width: 600px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.15);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-content h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--primary-text);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      margin: 0 0 0.25rem 0;
+      color: var(--primary-text);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .stat-detail {
+      margin: 0;
+      color: var(--secondary-text);
+      font-size: 0.875rem;
+    }
+
+    /* --- INJ Pass Hero Section --- */
+    .inj-pass-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin: 0;
+      max-width: 1200px;
+      width: 100%;
+      height: 100vh;
+      padding: 0 2rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-content {
+      text-align: left;
+      margin-left: 1.75cm;
+      margin-top: -0.5cm;
+    }
+
+    .hero-icon {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-icon span {
+      font-size: 3rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .pass-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, rgba(76, 61, 255, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .hero-badge {
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .badge-text {
+      background: linear-gradient(135deg, #ef4444, #f59e0b);
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+      animation: badgeBreath 3s infinite ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge-text::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: badgeShimmer 4s infinite;
+    }
+
+    @keyframes badgeBreath {
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(239, 68, 68, 0.3);
+      }
+    }
+
+    @keyframes badgeShimmer {
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--primary-text);
+      margin: 0 0 1rem 0;
+      background: linear-gradient(135deg, var(--blue-light), var(--teal-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--secondary-text);
+      margin: 0 0 2.5rem 0;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    .hero-features {
+      margin-bottom: 2.5rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1.125rem;
+      color: var(--primary-text);
+      font-weight: 500;
+    }
+
+    .feature-dot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--teal-accent), var(--blue-accent));
+      color: white;
+      border-radius: 50%;
+      font-size: 1.125rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(76, 61, 255, 0.2);
+    }
+
+    .hero-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(135deg, var(--blue-light), var(--blue-accent));
+      color: white;
+      border: none;
+      border-radius: 1.25rem;
+      padding: 1.25rem 2.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 12px 32px rgba(76, 61, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .hero-btn:hover::before {
+      left: 100%;
+    }
+
+    .hero-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(76, 61, 255, 0.4);
+    }
+
+    .hero-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+
+    .hero-btn:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* Pass Preview */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: -0.75cm;
+      margin-top: 1.3cm;
+    }
+
+    .pass-preview {
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .pass-card {
+      width: 350px;
+      height: 225px;
+      background: linear-gradient(135deg, var(--card-bg), var(--surface));
+      border: 2px solid var(--card-border);
+      border-radius: 1.25rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px rgba(76, 61, 255, 0.15);
+      animation: cardFloat 8s infinite ease-in-out;
+      position: relative;
+      overflow: hidden;
+      transform: scale(1.25);
+      perspective: 1000px;
+    }
+
+    .pass-card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .pass-card.auto-flip .pass-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    /* Disable flip animation for welcome screen */
+    #welcome-wallet-screen .pass-card.auto-flip .pass-card-inner {
+      transform: rotateY(0deg);
+    }
+
+    .pass-card-front,
+    .pass-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .pass-card-front {
+      background: linear-gradient(135deg, var(--card-bg), var(--surface));
+      padding: 1.875rem;
+    }
+
+    .pass-card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, #ef4444, #f59e0b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .pass-card-back::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+      border-radius: 1.25rem;
+      pointer-events: none;
+    }
+
+    .advx-content {
+      text-align: center;
+      color: white;
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .advx-icon {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      animation: advxBounce 2s infinite ease-in-out;
+    }
+
+    .advx-icon img {
+      width: 3.5rem;
+      height: 3.5rem;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .advx-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 0.75rem;
+      letter-spacing: 2px;
+    }
+
+    .advx-subtitle {
+      font-size: 1.25rem;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    @keyframes advxBounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .pass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(76, 61, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      border-radius: 1.25rem;
+      pointer-events: none;
+    }
+
+    .pass-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+      border-radius: 1.25rem;
+      animation: cardShimmer 6s infinite;
+      pointer-events: none;
+    }
+
+
+
+    @keyframes cardFloat {
+      0% {
+        transform: translateY(0px) rotateY(0deg) scale(1.25);
+      }
+
+      25% {
+        transform: translateY(-8px) rotateY(3deg) scale(1.25);
+      }
+
+      50% {
+        transform: translateY(-12px) rotateY(5deg) scale(1.25);
+      }
+
+      75% {
+        transform: translateY(-8px) rotateY(3deg) scale(1.25);
+      }
+
+      100% {
+        transform: translateY(0px) rotateY(0deg) scale(1.25);
+      }
+    }
+
+    @keyframes cardShimmer {
+      0% {
+        transform: translateX(-100%) translateY(-100%);
+      }
+
+      100% {
+        transform: translateX(100%) translateY(100%);
+      }
+    }
+
+    .pass-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .pass-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue-light);
+    }
+
+    .pass-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--teal-accent);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+    }
+
+    .pass-body {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .pass-photo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .pass-photo::after {
+      content: '👤';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+    }
+
+    .pass-info {
+      flex: 1;
+    }
+
+    .pass-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--primary-text);
+      margin-bottom: 0.25rem;
+    }
+
+    .pass-id {
+      font-size: 0.875rem;
+      color: var(--secondary-text);
+    }
+
+    .pass-footer {
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 2;
+    }
+
+    .nfc-indicator {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--orange-accent);
+      background: rgba(249, 115, 22, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+    }
+
+    /* --- Feature Cards (Secondary) --- */
+    .feature-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem auto;
+      max-width: 500px;
+    }
+
+    .feature-card.secondary {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      opacity: 0.8;
+    }
+
+    .feature-card.secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.1);
+      opacity: 1;
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--primary-text);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .feature-card p {
+      margin: 0 0 1rem 0;
+      color: var(--secondary-text);
+      font-size: 0.875rem;
+    }
+
+    .feature-btn.secondary {
+      background: var(--surface);
+      color: var(--primary-text);
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .feature-btn.secondary:hover {
+      background: var(--blue-accent);
+      color: white;
+      border-color: var(--blue-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(76, 61, 255, 0.3);
+    }
+
+    /* Android优化 */
+    @supports (-webkit-appearance: none) {
+      /* WebKit浏览器优化 */
+      .nfc-scan-container,
+      .ecosystem-card,
+      .activity-item,
+      .settings-item {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+    }
+
+    /* Android Chrome优化 */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+      .nfc-scan-container,
+      .ecosystem-card,
+      .activity-item,
+      .settings-item {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+    }
+
+    /* --- Responsive Design --- */
+    @media (max-width: 768px) {
+      .inj-pass-hero {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+        margin: 0;
+        padding: 1rem;
+        min-height: 100vh;
+        justify-items: center;
+        overflow-y: auto;
+      }
+
+      .hero-content {
+        text-align: center;
+        margin-left: 0;
+        order: 2;
+        margin-top: -3cm;
+      }
+
+      .hero-visual {
+        order: 1;
+        margin-left: 0;
+        margin-top: 1.6cm;
+      }
+
+      .hero-icon {
+        display: none;
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.125rem;
+      }
+
+      .badge-text {
+        font-size: 0.75rem;
+        padding: 0.375rem 1rem;
+      }
+
+      .feature-item {
+        font-size: 1rem;
+        gap: 0.75rem;
+      }
+
+      .feature-dot {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+      }
+
+      .hero-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .pass-card {
+        width: 300px;
+        height: 187px;
+        padding: 1.25rem;
+        transform: scale(1.25);
+      }
+
+      .wallet-selection-container {
+        padding: 1rem;
+      }
+
+      .wallet-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .ecosystem-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .ecosystem-single-card {
+        margin-top: 2rem;
+        min-height: 300px;
+      }
+
+      .ecosystem-card {
+        padding: 2rem 1.5rem;
+        max-width: 350px;
+      }
+
+      .ecosystem-icon {
+        font-size: 3rem;
+      }
+
+      .ecosystem-container,
+      .activity-container,
+      .settings-container {
+        padding: 1rem;
+      }
+
+      .balance-section {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .balance-module {
+        padding: 0.75rem;
+      }
+
+      .balance-amount {
+        font-size: 2rem;
+      }
+
+      .balance-amount span {
+        font-size: 1.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .inj-pass-hero {
+        padding: 0.5rem;
+        gap: 1.5rem;
+        justify-items: center;
+        min-height: 100vh;
+        overflow-y: auto;
+      }
+
+      .hero-content {
+        margin-left: 0;
+        order: 2;
+        margin-top: -3cm;
+      }
+
+      .hero-visual {
+        order: 1;
+        margin-left: 0;
+        margin-top: 1.6cm;
+      }
+
+      .hero-icon {
+        display: none;
+      }
+
+      .balance-section {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .balance-module {
+        padding: 0.5rem;
+      }
+
+      .balance-amount {
+        font-size: 1.75rem;
+      }
+
+      .balance-amount span {
+        font-size: 1rem;
+      }
+
+      .nfc-scan-container {
+        padding: 1rem;
+      }
+
+      .nfc-scan-card {
+        padding: 1.5rem;
+      }
+
+      .nfc-scan-animation {
+        width: 150px;
+        height: 150px;
+      }
+
+      .scan-circle {
+        width: 120px;
+        height: 120px;
+      }
+
+      .nfc-icon {
+        font-size: 2.5rem;
+      }
+
+      .passkey-create-container {
+        padding: 1rem;
+      }
+
+      .passkey-create-card {
+        padding: 1.5rem;
+      }
+
+      .passkey-icon {
+        font-size: 2.5rem;
+      }
+
+      .passkey-create-header h2 {
+        font-size: 1.5rem;
+      }
+
+      .passkey-create-container {
+        padding: 0.5rem;
+      }
+
+      .passkey-create-card {
+        padding: 1rem;
+      }
+
+      .passkey-icon {
+        font-size: 2rem;
+      }
+
+      .passkey-create-header h2 {
+        font-size: 1.25rem;
+      }
+
+      .input-group input {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .passkey-create-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .hero-subtitle {
+        font-size: 0.875rem;
+      }
+
+      .pass-card {
+        width: 250px;
+        height: 150px;
+        padding: 1rem;
+        transform: scale(1.25);
+      }
+
+      .pass-name {
+        font-size: 1rem;
+      }
+
+      .pass-id {
+        font-size: 0.75rem;
+      }
+
+      .hero-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* --- Wallet Selection Screen --- */
+    .wallet-selection-container {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .wallet-subtitle {
+      color: var(--secondary-text);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .wallet-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.5rem;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .wallet-option:hover {
+      border-color: var(--blue-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(76, 61, 255, 0.15);
+    }
+
+    .hot-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: linear-gradient(135deg, var(--red-accent), var(--orange-accent));
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .wallet-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--blue-accent), var(--teal-accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* --- NFC Scan Screen --- */
+    .nfc-scan-container {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+      transform: translateY(100vh);
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      /* Android优化 */
+      -webkit-transform: translateY(100vh);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    .nfc-scan-container.active {
+      transform: translateY(0);
+    }
+
+    .nfc-scan-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(76, 61, 255, 0.1);
+      transform: scale(0.9);
+      -webkit-transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      /* Android优化 */
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: transform, opacity;
+    }
+
+    .nfc-scan-container.active .nfc-scan-card {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .nfc-scan-header h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: var(--primary-text);
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nfc-scan-header p {
+      color: var(--secondary-text);
+      margin: 0 0 2rem 0;
+      font-size: 1rem;
+    }
+
+    .nfc-scan-animation {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 2rem auto;
+    }
+
+    .scan-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 150px;
+      height: 150px;
+      border: 2px solid var(--blue-accent);
+      border-radius: 50%;
+      animation: scanPulse 2s infinite;
+    }
+
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--blue-accent), transparent);
+      animation: scanRotate 3s linear infinite;
+    }
+
+    .nfc-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      animation: nfcFloat 2s ease-in-out infinite;
+    }
+
+    .nfc-scan-status {
+      margin: 1.5rem 0;
+    }
+
+    .nfc-scan-status p {
+      color: var(--secondary-text);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .nfc-scan-btn {
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 auto 1rem auto;
+    }
+
+    .nfc-scan-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(76, 61, 255, 0.3);
+    }
+
+    .nfc-skip-btn {
+      background: transparent;
+      color: var(--secondary-text);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nfc-skip-btn:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+      color: var(--primary-text);
+    }
+
+    /* Back button styles */
+    .back-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 100;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 0.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .back-btn:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(76, 61, 255, 0.2);
+    }
+
+    .back-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--primary-text);
+    }
+
+    /* Hide back button on welcome screen */
+    #welcome-wallet-screen .back-btn {
+      display: none;
+    }
+
+    /* Emoji fade-in animation */
+    .emoji-fade-in {
+      opacity: 0;
+      animation: emojiFadeIn 0.8s ease-in-out forwards;
+    }
+
+    @keyframes emojiFadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes scanPulse {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        -webkit-transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        -webkit-transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes scanRotate {
+      0% {
+        transform: translateX(-50%) rotate(0deg);
+        -webkit-transform: translateX(-50%) rotate(0deg);
+      }
+
+      100% {
+        transform: translateX(-50%) rotate(360deg);
+        -webkit-transform: translateX(-50%) rotate(360deg);
+      }
+    }
+
+    @keyframes nfcFloat {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) translateY(0);
+        -webkit-transform: translate(-50%, -50%) translateY(0);
+      }
+
+      50% {
+        transform: translate(-50%, -50%) translateY(-10px);
+        -webkit-transform: translate(-50%, -50%) translateY(-10px);
+      }
+    }
+
+    /* --- Passkey Create Screen --- */
+    .passkey-create-container {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .passkey-create-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(76, 61, 255, 0.1);
+    }
+
+    .passkey-create-header {
+      margin-bottom: 2rem;
+    }
+
+    .passkey-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: passkeyPulse 2s ease-in-out infinite;
+    }
+
+    .passkey-create-header h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: var(--primary-text);
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .passkey-create-header p {
+      color: var(--secondary-text);
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .passkey-create-form {
+      text-align: left;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      color: var(--primary-text);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--surface-border);
+      border-radius: 0.75rem;
+      background: var(--surface);
+      color: var(--primary-text);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--blue-accent);
+      box-shadow: 0 0 0 3px rgba(76, 61, 255, 0.1);
+    }
+
+    .input-group small {
+      display: block;
+      color: var(--secondary-text);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .passkey-create-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .passkey-create-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(76, 61, 255, 0.3);
+    }
+
+    .passkey-create-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .passkey-back-btn {
+      width: 100%;
+      background: transparent;
+      color: var(--secondary-text);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .passkey-back-btn:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+      color: var(--primary-text);
+    }
+
+    .passkey-status {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    .passkey-status.success {
+      display: block;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .passkey-status.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    @keyframes passkeyPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    /* --- Ecosystem Screen --- */
+    .ecosystem-container {
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .ecosystem-subtitle {
+      color: var(--secondary-text);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .ecosystem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .ecosystem-single-card {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 3rem;
+      min-height: 400px;
+    }
+
+    .ecosystem-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 3rem 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(76, 61, 255, 0.1);
+      /* Android优化 */
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    .ecosystem-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(76, 61, 255, 0.05) 50%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+
+    .ecosystem-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(76, 61, 255, 0.2);
+      border-color: var(--blue-accent);
+    }
+
+    .ecosystem-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      animation: catBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes catBounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .ecosystem-card h3 {
+      color: var(--primary-text);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+    }
+
+    .ecosystem-card p {
+      color: var(--secondary-text);
+      font-size: 1rem;
+      margin: 0 0 2rem 0;
+      line-height: 1.5;
+    }
+
+    .ecosystem-stats {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .ecosystem-stats .stat {
+      background: var(--surface-muted);
+      color: var(--primary-text);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+    }
+
+    .ecosystem-btn {
+      background: linear-gradient(135deg, var(--blue-light), var(--blue-accent));
+      color: white;
+      border: none;
+      border-radius: 1rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(76, 61, 255, 0.2);
+    }
+
+    .ecosystem-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.4);
+    }
+
+    /* --- Cat Mint Screen --- */
+    .cat-mint-container {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .cat-mint-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(76, 61, 255, 0.1);
+    }
+
+    .cat-mint-header {
+      margin-bottom: 2rem;
+    }
+
+    .cat-mint-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: catBounce 2s ease-in-out infinite;
+    }
+
+    .cat-mint-header h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: var(--primary-text);
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cat-mint-header p {
+      color: var(--secondary-text);
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .cat-mint-content {
+      text-align: center;
+    }
+
+    .cat-preview {
+      margin-bottom: 2rem;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .cat-image {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.15);
+    }
+
+    .cat-mint-success {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .cat-mint-success h3 {
+      color: var(--teal-accent);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .cat-mint-success p {
+      color: var(--secondary-text);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .cat-mint-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .cat-mint-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(76, 61, 255, 0.3);
+    }
+
+    .cat-mint-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @keyframes catBounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* --- Modal Styles --- */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-content {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(20px);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      color: var(--primary-text);
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--secondary-text);
+      cursor: pointer;
+      padding: 0;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--surface-muted);
+      color: var(--primary-text);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .private-key-display {
+      margin-bottom: 1.5rem;
+    }
+
+    .private-key-label {
+      margin: 0 0 0.75rem 0;
+      color: var(--primary-text);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .private-key-value {
+      background: var(--surface-muted);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--primary-text);
+      word-break: break-all;
+      line-height: 1.4;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .private-key-warning {
+      margin: 0;
+      color: var(--red-accent);
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      padding: 0.75rem;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .modal-btn {
+      background: var(--blue-accent);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn:hover {
+      background: var(--blue-light);
+      transform: translateY(-1px);
+    }
+
+    /* --- Activity Screen --- */
+    .activity-container {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .activity-subtitle {
+      color: var(--secondary-text);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      /* Android优化 */
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    .activity-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 15px rgba(76, 61, 255, 0.1);
+    }
+
+    .activity-icon {
+      font-size: 1.5rem;
+      width: 48px;
+      height: 48px;
+      background: var(--surface-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .activity-content h4 {
+      color: var(--primary-text);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .activity-content p {
+      color: var(--secondary-text);
+      font-size: 0.875rem;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .activity-time {
+      color: var(--muted-text);
+      font-size: 0.75rem;
+    }
+
+    .activity-status {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .activity-status.success {
+      background: var(--teal-accent);
+      color: white;
+    }
+
+    /* --- Settings Screen --- */
+    .settings-container {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .settings-subtitle {
+      color: var(--secondary-text);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .settings-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 15px rgba(76, 61, 255, 0.1);
+    }
+
+    .settings-icon {
+      font-size: 1.5rem;
+      width: 48px;
+      height: 48px;
+      background: var(--surface-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .settings-content h4 {
+      color: var(--primary-text);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .settings-content p {
+      color: var(--secondary-text);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .settings-toggle {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--surface-muted);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .settings-toggle.active {
+      background: var(--blue-accent);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .settings-toggle.active .toggle-slider {
+      transform: translateX(24px);
+    }
+
+    .settings-btn {
+      background: var(--surface-muted);
+      color: var(--primary-text);
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .settings-btn:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+    }
+
+    .settings-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .settings-action-btn {
+      background: var(--card-bg);
+      color: var(--primary-text);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .settings-action-btn:hover {
+      background: var(--surface);
+      border-color: var(--blue-accent);
+    }
+
+    .settings-action-btn.danger {
+      color: var(--red-accent);
+      border-color: var(--red-accent);
+    }
+
+    .settings-action-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* --- Wallet Section --- */
+    .wallet-section {
+      margin-top: 2rem;
+    }
+
+    .section-title {
+      text-align: center;
+      color: var(--primary-text);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--blue-light), var(--teal-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* --- Welcome Screen --- */
+    .welcome-button {
+      position: relative;
+      width: 12rem;
+      height: 12rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .welcome-button:hover {
+      transform: scale(1.05);
+    }
+
+    .welcome-button:active {
+      transform: scale(0.95);
+    }
+
+    .welcome-glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(76, 61, 255, 0.15);
+      border-radius: 50%;
+      animation: pulse 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+    }
+
+    .welcome-inner {
+      position: relative;
+      width: 10rem;
+      height: 10rem;
+      background-color: var(--surface);
+      border-radius: 50%;
+      border: 2px solid var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(76, 61, 255, 0.1);
+    }
+
+    .welcome-inner svg {
+      width: 4rem;
+      height: 4rem;
+      color: #4c3dff;
+    }
+
+    .welcome-title {
+      margin-top: 2rem;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      color: var(--primary-text);
+    }
+
+    .welcome-subtitle {
+      margin-top: 0.5rem;
+      color: var(--secondary-text);
+      max-width: 20rem;
+    }
+
+    /* --- Wallet Screen --- */
+    .wallet-grid {
+      width: 100%;
+      max-width: 24rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .wallet-option {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: flex-start;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .wallet-option:hover {
+      background-color: var(--surface);
+      border-color: var(--blue-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.15);
+    }
+
+    .hot-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: linear-gradient(45deg, #ef4444, #dc2626);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+      animation: hotPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes hotPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .wallet-option.selected {
+      border-color: var(--blue-light);
+      box-shadow: 0 0 0 2px rgba(76, 61, 255, 0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    .wallet-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 0.25rem;
+      background: #E5E7EB;
+      /* placeholder */
+      flex-shrink: 0;
+    }
+
+    /* --- Scanning Screen --- */
+    .scanning-container {
+      position: relative;
+      width: 16rem;
+      height: 16rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scanning-sonar {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid var(--blue-light);
+      border-radius: 50%;
+      animation: sonar 2s infinite ease-out;
+      box-shadow: 0 0 20px rgba(76, 61, 255, 0.3);
+    }
+
+    @keyframes sonar {
+      from {
+        transform: scale(0.5);
+        opacity: 1;
+      }
+
+      to {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .scanning-icon {
+      position: absolute;
+      width: 5rem;
+      height: 5rem;
+      color: rgba(37, 99, 235, 0.7);
+    }
+
+    .scanning-status {
+      margin-top: 2rem;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    /* --- Minting Screen --- */
+    .minting-input-container {
+      position: relative;
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 24rem;
+    }
+
+    .minting-input {
+      width: 100%;
+      padding: 0.875rem 7rem 0.875rem 4rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      color: var(--primary-text);
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .minting-input-prefix {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-text);
+      font-weight: 500;
+      font-size: 1rem;
+      z-index: 2;
+    }
+
+    .minting-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(76, 61, 255, 0.2);
+      border-color: var(--blue-accent);
+      background-color: var(--surface);
+      transform: translateY(-1px);
+    }
+
+    .minting-input::placeholder {
+      color: var(--muted-text);
+    }
+
+    .minting-input-suffix {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-text);
+    }
+
+    .btn {
+      width: 100%;
+      max-width: 24rem;
+      margin-top: 1rem;
+      padding: 0.875rem 1.25rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue-accent));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(76, 61, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--blue-accent), var(--blue-light));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.4);
+    }
+
+    .btn-primary:disabled {
+      background: linear-gradient(135deg, #374151, #4B5563);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--teal-dark), var(--teal-accent));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, var(--teal-accent), var(--teal-light));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-ghost {
+      background: var(--card-bg);
+      color: var(--secondary-text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface);
+      color: var(--primary-text);
+      border-color: var(--blue-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(76, 61, 255, 0.15);
+    }
+
+    .minting-feedback {
+      text-align: center;
+      margin-top: 1rem;
+      min-height: 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feedback-success {
+      color: var(--teal-dark);
+    }
+
+    .feedback-error {
+      color: var(--red-light);
+    }
+
+    .spinner {
+      display: inline-block;
+      animation: spin 1.5s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* --- Dashboard --- */
+    .dashboard {
+      padding: 4rem 1rem 6rem 1rem;
+      overflow-y: auto;
+    }
+
+    /* --- Dashboard Card Flip --- */
+    .id-card {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 3 / 4.5;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      background: var(--surface);
+      perspective: 1200px;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+    }
+
+    .id-card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .id-card.flipped .id-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .id-card-front,
+    .id-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+      border-radius: 1rem;
+      overflow: hidden;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .id-card-back {
+      transform: rotateY(180deg);
+      background: var(--surface);
+      padding: 2rem 1rem 1.5rem 1rem;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .id-card-back .qrcode {
+      margin: 0 auto 1.2rem auto;
+      background: #fff;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      width: 160px;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .id-card-back .address-label {
+      font-size: 1rem;
+      color: var(--primary-text);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .id-card-back .address-value {
+      font-size: 0.95rem;
+      color: var(--secondary-text);
+      word-break: break-all;
+    }
+
+    /* 优雅的阴影和过渡 */
+    .id-card:hover {
+      box-shadow: 0 16px 40px rgba(76, 61, 255, 0.13);
+      transform: translateY(-4px) scale(1.01);
+    }
+
+    /* 夜间模式适配 */
+    [data-theme="dark"] .id-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      background: var(--surface);
+    }
+
+    [data-theme="dark"] .id-card:hover {
+      box-shadow: 0 20px 50px rgba(76, 61, 255, 0.2);
+      border-color: var(--blue-accent);
+    }
+
+    [data-theme="dark"] .id-card-front,
+    [data-theme="dark"] .id-card-back {
+      background: var(--surface);
+    }
+
+    [data-theme="dark"] .id-card-back .qrcode {
+      background: #1f2937;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+    }
+
+    [data-theme="dark"] .id-card-gradient {
+      background: linear-gradient(to top, rgba(31, 41, 55, 0.9), transparent);
+    }
+
+    [data-theme="dark"] .id-card-text h3 {
+      color: var(--primary-text);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="dark"] .id-card-text p {
+      color: var(--secondary-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .id-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      border: none;
+      box-shadow: none;
+      display: block;
+      /* 如需翻转图片可加transform: scaleX(-1); */
+    }
+
+    .id-card-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
+      transition: background 0.3s ease;
+    }
+
+    .id-card-text {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      padding: 1rem;
+    }
+
+    .id-card-text h3 {
+      font-size: 2.25rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      margin: 0;
+      color: var(--primary-text);
+      transition: color 0.3s ease;
+    }
+
+    .id-card-text p {
+      font-size: 0.875rem;
+      color: var(--secondary-text);
+      margin: 0;
+      transition: color 0.3s ease;
+    }
+
+    .balance-section {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .balance-module {
+      padding: 1rem;
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.75rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px rgba(76, 61, 255, 0.08);
+    }
+
+    .balance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .balance-header p {
+      color: var(--secondary-text);
+      margin: 0;
+    }
+
+    .balance-address {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--secondary-text);
+      cursor: pointer;
+    }
+
+    .balance-address svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .balance-amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0 0 0;
+      color: var(--primary-text);
+    }
+
+    .balance-amount span {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--secondary-text);
+    }
+
+    .balance-usd {
+      color: var(--secondary-text);
+      margin: 0.25rem 0 0 0;
+    }
+
+    .collection-section {
+      margin-top: 2rem;
+      text-align: left;
+    }
+
+    .collection-section h4 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      color: var(--primary-text);
+      text-align: left;
+    }
+
+    .collection-grid {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+
+    .collection-item {
+      flex-shrink: 0;
+      width: 6.4rem;
+      height: 8rem;
+      background-color: var(--surface-muted);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.5rem;
+      color: #9CA3AF;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .collection-item:hover {
+      box-shadow: 0 8px 25px rgba(76, 61, 255, 0.15);
+      border-color: var(--blue-accent);
+    }
+
+    .collection-item-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .collection-item.flipped .collection-item-inner {
+      transform: rotateY(180deg);
+    }
+
+    .collection-item-front,
+    .collection-item-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .collection-item-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, var(--blue-accent), var(--purple-accent));
+      color: white;
+    }
+
+    .collection-back-content {
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .collection-back-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .collection-back-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .collection-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      border: none;
+      box-shadow: none;
+      display: block;
+    }
+
+    .collection-item svg {
+      width: 1.75rem;
+      height: 1.75rem;
+      opacity: 0.8;
+    }
+
+    /* --- Tab Bar --- */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding: 0.5rem;
+    }
+
+    .tab-bar-inner {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 4rem;
+      background-color: var(--glass);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(76, 61, 255, 0.1);
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      color: var(--secondary-text);
+      transition: color 0.2s;
+      /* Android优化 */
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: color;
+    }
+
+    .tab-item.active {
+      color: var(--blue-dark);
+      text-shadow: 0 0 10px rgba(76, 61, 255, 0.3);
+    }
+
+    .tab-item svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .tab-item p {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      margin-bottom: 0;
+    }
+
+    /* --- Powered by Image --- */
+    .powered-by-container {
+      position: fixed;
+      bottom: 1.2rem;
+      left: calc(50% - 0.2cm);
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.1rem;
+      text-align: center;
+    }
+
+    .powered-by-image {
+      width: 2.5cm;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .powered-by-text {
+      font-size: 0.9rem;
+      color: var(--secondary-text);
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="lang-toggle-btn" class="lang-toggle disabled">EN</button>
+  <button id="theme-toggle-btn" class="theme-toggle">
+    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+    <svg class="moon-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </button>
+  <div id="wallet-address-display"
+    style="position:fixed;top:1rem;right:6.5rem;z-index:101;background:var(--card-bg);border:1px solid var(--card-border);border-radius:9999px;padding:0.375rem 0.75rem;font-size:0.875rem;color:var(--primary-text);display:none;min-width:6rem;text-align:center;cursor:pointer;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);backdrop-filter:blur(10px);">
+  </div>
+
+  <!-- Wallet Address Dropdown Menu -->
+  <div id="wallet-dropdown"
+    style="position:fixed;top:3.5rem;right:6.5rem;z-index:102;background:var(--surface);border:1px solid var(--surface-border);border-radius:0.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:none;min-width:12rem;overflow:hidden;transition:opacity 0.2s ease;opacity:0;">
+    <div class="dropdown-item" id="copy-address-dropdown"
+      style="padding:0.75rem 1rem;cursor:pointer;transition:background-color 0.2s;display:flex;align-items:center;gap:0.5rem;">
+      <svg style="width:1rem;height:1rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+      </svg>
+      <span data-i18n="wallet.copyAddress">Copy Address</span>
+    </div>
+    <div class="dropdown-item" id="view-injscan-dropdown"
+      style="padding:0.75rem 1rem;cursor:pointer;transition:background-color 0.2s;display:flex;align-items:center;gap:0.5rem;">
+      <svg style="width:1rem;height:1rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+      <span data-i18n="wallet.viewOnInjScan">View on InjScan</span>
+    </div>
+    <div class="dropdown-item" id="disconnect-dropdown"
+      style="padding:0.75rem 1rem;cursor:pointer;transition:background-color 0.2s;display:flex;align-items:center;gap:0.5rem;border-top:1px solid var(--surface-border);color:var(--red-light);">
+      <svg style="width:1rem;height:1rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>
+      <span data-i18n="wallet.disconnect">Disconnect</span>
+    </div>
+  </div>
+
+  <div class="animated-background">
+    <div class="blur-orb orb1"></div>
+    <div class="blur-orb orb2"></div>
+    <div class="blur-orb orb3"></div>
+    <div class="blur-orb orb4"></div>
+    <div class="blur-orb orb5"></div>
+    <div class="blur-orb orb6"></div>
+    <div class="blur-orb orb7"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Welcome + Wallet Screen -->
+  <div id="welcome-wallet-screen" class="screen active">
+    <!-- INJ Pass Hero Section -->
+    <div class="inj-pass-hero">
+      <div class="hero-content">
+        <div class="hero-icon">
+          <div class="pass-glow"></div>
+          <span>🎯</span>
+        </div>
+        <div class="hero-badge">
+          <span class="badge-text" data-i18n="welcome.badge">AdventureX 2025 特别款</span>
+        </div>
+        <h2 class="hero-title">Injective Pass</h2>
+        <p class="hero-subtitle" data-i18n="welcome.subtitle">你的专属数字身份</p>
+        <div class="hero-features">
+          <div class="feature-item">
+            <span class="feature-dot">⚡</span>
+            <span data-i18n="welcome.feature1">1秒获取链上身份</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot">🌐</span>
+            <span data-i18n="welcome.feature2">专属唯一.inj域名</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot">🔐</span>
+            <span data-i18n="welcome.feature3">无密码安全登录</span>
+          </div>
+        </div>
+        <button class="hero-btn" onclick="handleCreatePass()">
+          <span data-i18n="welcome.createButton">开始创建</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      </div>
+      <div class="hero-visual">
+        <div class="pass-preview">
+          <div class="pass-card" id="auto-flip-card">
+            <div class="pass-card-inner">
+              <div class="pass-card-front">
+                <div class="pass-header">
+                  <div class="pass-logo">Injective</div>
+                  <div class="pass-status">On-Chain</div>
+                </div>
+                <div class="pass-body">
+                  <div class="pass-photo"></div>
+                  <div class="pass-info">
+                    <div class="pass-name">yourname.inj</div>
+                    <div class="pass-id">ID: 0x1234...5678</div>
+                  </div>
+                </div>
+              </div>
+              <div class="pass-card-back">
+                <div class="advx-content">
+                  <div class="advx-icon"><img src="advxlogo.png" alt="AdvX Logo"
+                      style="width:3rem;height:3rem;object-fit:contain;"></div>
+                  <div class="advx-title">AdventureX</div>
+                  <div class="advx-subtitle">让创造发生</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Powered by Image - Hidden on welcome screen -->
+    <div class="powered-by-container" style="display: none;">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Passkey Create Screen -->
+  <div id="passkey-create-screen" class="screen">
+    <button class="back-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <div class="passkey-create-container">
+      <div class="passkey-create-card">
+        <div class="passkey-create-header">
+          <div class="passkey-icon">🔐</div>
+          <h2>创建您的云托管通行证</h2>
+          <p>来访问 Injective 生态系统</p>
+        </div>
+
+        <div class="passkey-create-form">
+          <div class="input-group">
+            <label for="passkey-username">用户名</label>
+            <input type="text" id="passkey-username" placeholder="请输入用户名" maxlength="20">
+            <small>用户名将用于识别您的通行证</small>
+          </div>
+
+          <button class="passkey-create-btn" onclick="handleCreatePasskey()">
+            <span>创建云托管通行证</span>
+          </button>
+
+          <button class="passkey-back-btn" onclick="navigateTo('welcome-wallet-screen')">
+            <span>返回</span>
+          </button>
+        </div>
+
+        <div class="passkey-status" id="passkey-status"></div>
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- NFC Scan Screen -->
+  <div id="nfc-scan-screen" class="screen">
+    <button class="back-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <div class="nfc-scan-container">
+      <div class="nfc-scan-card">
+        <div class="nfc-scan-header">
+          <h2 data-i18n="nfc.scanning">正在扫描</h2>
+          <p data-i18n="nfc.instruction">请将您的AdventureX卡片靠近手机</p>
+        </div>
+
+        <div class="nfc-scan-animation">
+          <div class="scan-circle">
+            <div class="scan-line"></div>
+          </div>
+          <div class="nfc-icon">👋</div>
+        </div>
+
+        <div class="nfc-scan-status">
+          <p id="nfc-status-text" data-i18n="nfc.status">正在扫描...</p>
+        </div>
+
+        <button class="nfc-skip-btn" onclick="navigateTo('minting-screen')">
+          <span data-i18n="nfc.skip">跳过扫描</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Wallet Selection Screen -->
+  <div id="wallet-screen" class="screen">
+    <button class="back-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <!-- Animated Background -->
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="wallet-selection-container">
+      <h2 class="section-title" data-i18n="wallet.selectTitle">选择钱包连接</h2>
+      <p class="wallet-subtitle" data-i18n="wallet.selectSubtitle">请选择一个钱包继续，或跳过直接扫描 NFC</p>
+      <div class="wallet-grid">
+        <button class="wallet-option" data-wallet="adventure25">
+          <span class="hot-badge">HOT</span>
+          <span class="wallet-icon"></span>
+          <span data-i18n="wallet.adventure25">Adventure 25'</span>
+        </button>
+        <button class="wallet-option" data-wallet="metamask">
+          <span class="wallet-icon"></span>
+          <span data-i18n="wallet.metamask">MetaMask</span>
+        </button>
+        <button class="wallet-option" data-wallet="tokenpocket">
+          <span class="wallet-icon"></span>
+          <span data-i18n="wallet.tokenpocket">Token Pocket</span>
+        </button>
+      </div>
+      <div id="adventure-section" style="display:none;">
+        <h2 class="welcome-title" style="font-size:1.25rem; margin-top:2rem;" data-i18n="wallet.title">Choose how to
+          activate</h2>
+        <p class="welcome-subtitle" data-i18n="wallet.subtitle">Select a wallet to continue, or skip and scan NFC
+          directly.</p>
+        <button id="wallet-continue-btn" class="btn btn-primary" disabled data-i18n="wallet.continue">Continue</button>
+        <button id="wallet-skip-btn" class="btn btn-ghost" data-i18n="wallet.skip">Skip, scan NFC</button>
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Scanning Screen -->
+  <div id="scanning-screen" class="screen">
+    <div class="scanning-container">
+      <div id="scanning-animation-container">
+        <div class="scanning-sonar"></div>
+        <svg class="scanning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+          <path d="M14 12a2 2 0 0 1 2 2c0 2.21-.35 6-2 6" />
+          <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+          <path d="M2 12a10 10 0 0 1 18-2" />
+          <path d="M5.5 19a2 2 0 0 0 2 2c1.7 0 3-2 3-4 0-2.21-.85-6-3-6s-3 3.79-3 6c0 .55.13 1.2.33 1.82" />
+          <path d="M9 12a2 2 0 0 0-2-2c-1.33 0-3 2.01-3 5.5a4.5 4.5 0 0 0 4.5 4.5c1.41 0 2.84-.93 3.5-2.02" />
+        </svg>
+      </div>
+    </div>
+    <p id="scanning-status" class="scanning-status" data-i18n="scanning.ready">Ready to scan...</p>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Minting Screen -->
+  <div id="minting-screen" class="screen">
+    <button class="back-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <div id="minting-step-domain">
+      <h2 class="welcome-title" style="font-size: 1.5rem;" data-i18n="mint.title"><span class="emoji-fade-in">🌍</span>
+        创建您的.inj域名</h2>
+
+      <div class="minting-input-container">
+        <span class="minting-input-prefix">advx-</span>
+        <input type="text" id="domain-input" class="minting-input" data-i18n-placeholder="mint.placeholder"
+          placeholder="例如: Vincent">
+        <span class="minting-input-suffix">.inj</span>
+      </div>
+      <button id="check-domain-btn" class="btn btn-primary" data-i18n="mint.check">Check availability</button>
+      <div id="minting-feedback" class="minting-feedback"></div>
+    </div>
+    <div id="minting-step-minting" style="display: none; text-align: center;">
+      <div class="spinner">
+        <svg style="width: 4rem; height: 4rem; color: var(--teal-light);" xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      </div>
+      <p id="minting-status" class="scanning-status"></p>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Dashboard Screen -->
+  <div id="dashboard-screen" class="screen dashboard">
+    <div class="id-card" id="dashboard-id-card" onclick="toggleDashboardCard()">
+      <div class="id-card-inner">
+        <div class="id-card-front">
+          <img id="dashboard-nft-image" src="" alt="NFT Image" />
+          <div class="id-card-gradient"></div>
+          <div class="id-card-text">
+            <h3 id="dashboard-nft-name"></h3>
+            <p>inj Identity Pass</p>
+          </div>
+        </div>
+        <div class="id-card-back">
+          <div class="qrcode" id="dashboard-qrcode"></div>
+          <div class="address-label">Injective Address</div>
+          <div class="address-value" id="dashboard-address-back"></div>
+        </div>
+      </div>
+    </div>
+    <div class="balance-section">
+      <div class="balance-module">
+        <div class="balance-header">
+          <p data-i18n="dashboard.totalAssets">资产</p>
+          <div class="balance-address" id="copy-address-btn">
+            <span id="dashboard-address"></span>
+            <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+            </svg>
+            <svg id="check-icon" style="display: none; color: var(--teal-dark);" xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        </div>
+        <p class="balance-amount"><span id="dashboard-inj-balance"></span> <span>INJ</span></p>
+        <p class="balance-usd">≈ $<span id="dashboard-usdt-balance"></span> USDT</p>
+      </div>
+
+      <div class="balance-module">
+        <div class="balance-header">
+          <p>Injective XP</p>
+        </div>
+        <p class="balance-amount"><span id="dashboard-xp-balance">0</span></p>
+        <p class="balance-usd">经验值</p>
+      </div>
+    </div>
+    <div class="collection-section">
+      <h4 data-i18n="dashboard.collection">收藏品</h4>
+      <div class="collection-grid">
+        <div class="collection-item" onclick="this.classList.toggle('flipped')">
+          <div class="collection-item-inner">
+            <div class="collection-item-front">
+              <img src="advx.png" alt="Adventure X" />
+            </div>
+            <div class="collection-item-back">
+              <div class="collection-back-content">
+                <div class="collection-back-icon">🔗</div>
+                <div class="collection-back-text">Fully On-Chain</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="collection-item" onclick="this.classList.toggle('flipped')">
+          <div class="collection-item-inner">
+            <div class="collection-item-front">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                <polyline points="2 17 12 22 22 17" />
+                <polyline points="2 12 12 17 22 12" />
+              </svg>
+            </div>
+            <div class="collection-item-back">
+              <div class="collection-back-content">
+                <div class="collection-back-icon">🔗</div>
+                <div class="collection-back-text">Fully On-Chain</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="collection-item" onclick="this.classList.toggle('flipped')">
+          <div class="collection-item-inner">
+            <div class="collection-item-front">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                <polyline points="2 17 12 22 22 17" />
+                <polyline points="2 12 12 17 22 12" />
+              </svg>
+            </div>
+            <div class="collection-item-back">
+              <div class="collection-back-content">
+                <div class="collection-back-icon">🔗</div>
+                <div class="collection-back-text">Fully On-Chain</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ecosystem Screen -->
+  <div id="ecosystem-screen" class="screen">
+    <!-- Animated Background -->
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="ecosystem-container">
+      <h2 class="section-title">Injective Pass 生态</h2>
+      <p class="ecosystem-subtitle">探索 Injective Pass 生态系统中的优秀项目</p>
+
+      <div class="ecosystem-single-card">
+        <div class="ecosystem-card">
+          <div class="ecosystem-icon">🐱</div>
+          <h3>Injective Cats</h3>
+          <p>在Injective上申领你的第一个赛博猫咪</p>
+          <button class="ecosystem-btn" onclick="navigateTo('cat-mint-screen')">访问</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Activity Screen -->
+  <div id="activity-screen" class="screen">
+    <!-- Animated Background -->
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="activity-container">
+      <h2 class="section-title">活动记录</h2>
+      <p class="activity-subtitle">您的 inj Pass 活动历史</p>
+
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon">🎯</div>
+          <div class="activity-content">
+            <h4>inj Pass 创建成功</h4>
+            <p>已成功创建通行证并激活</p>
+            <span class="activity-time">2 小时前</span>
+          </div>
+          <div class="activity-status success">✓</div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">🔗</div>
+          <div class="activity-content">
+            <h4>EVM地址</h4>
+            <p>EVM地址已成功绑定</p>
+            <span class="activity-time">2 小时前</span>
+          </div>
+          <div class="activity-status success">✓</div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">🏷️</div>
+          <div class="activity-content">
+            <h4>域名注册</h4>
+            <p>inj域名已成功注册</p>
+            <span class="activity-time">2 小时前</span>
+          </div>
+          <div class="activity-status success">✓</div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">📱</div>
+          <div class="activity-content">
+            <h4>设备绑定</h4>
+            <p>安全设备绑定完成</p>
+            <span class="activity-time">2 小时前</span>
+          </div>
+          <div class="activity-status success">✓</div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">💎</div>
+          <div class="activity-content">
+            <h4>NFT 铸造</h4>
+            <p>身份 NFT 已成功铸造</p>
+            <span class="activity-time">2 小时前</span>
+          </div>
+          <div class="activity-status success">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Settings Screen -->
+  <div id="settings-screen" class="screen">
+    <!-- Animated Background -->
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="settings-container">
+      <h2 class="section-title">设置</h2>
+      <p class="settings-subtitle">管理您的 inj Pass 设置</p>
+
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-icon">🌙</div>
+          <div class="settings-content">
+            <h4>主题模式</h4>
+            <p>切换日间/夜间模式</p>
+          </div>
+          <button id="theme-toggle-settings" class="settings-toggle">
+            <span class="toggle-slider"></span>
+          </button>
+        </div>
+
+        <!-- <div class="settings-item">
+          <div class="settings-icon">🌍</div>
+          <div class="settings-content">
+            <h4>清理缓存</h4>
+            <p>清空本地缓存</p>
+          </div>
+          <button id="lang-toggle-settings" class="settings-btn">清空</button>
+        </div> -->
+
+        <div class="settings-item">
+          <div class="settings-icon">🔔</div>
+          <div class="settings-content">
+            <h4>通知设置</h4>
+            <p>管理推送通知</p>
+          </div>
+          <button class="settings-toggle">
+            <span class="toggle-slider"></span>
+          </button>
+        </div>
+
+        <!-- <div class="settings-item">
+          <div class="settings-icon">🔒</div>
+          <div class="settings-content">
+            <h4>隐私设置</h4>
+            <p>管理数据隐私</p>
+          </div>
+          <button class="settings-btn">管理</button>
+        </div> -->
+
+        <!-- 不需要了这些 -->
+
+        <div class="settings-item">
+          <div class="settings-icon">💾</div>
+          <div class="settings-content">
+            <h4>导出私钥</h4>
+            <p>备份您的通行证数据</p>
+          </div>
+          <button class="settings-btn" onclick="showPrivateKeyModal()">备份</button>
+        </div>
+
+        <!--  <div class="settings-item">
+          <div class="settings-icon">🔄</div>
+          <div class="settings-content">
+            <h4>同步设置</h4>
+            <p>跨设备同步数据</p>
+          </div>
+          <button class="settings-toggle">
+            <span class="toggle-slider"></span>
+          </button>
+        </div> -->
+      </div>
+
+      <div class="settings-actions">
+        <button class="settings-action-btn danger">关闭通行证</button>
+        <!--   <button class="settings-action-btn">导出数据</button>
+        <button class="settings-action-btn">重置设置</button> -->
+        <!-- 导出数据已经由导出私钥代替了 -->
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Private Key Modal -->
+  <div id="private-key-modal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>导出私钥</h3>
+        <button class="modal-close" onclick="closePrivateKeyModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="private-key-display">
+          <p class="private-key-label">您的私钥：</p>
+          <div class="private-key-value" id="private-key-value">
+            0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+          </div>
+        </div>
+        <p class="private-key-warning">请确保周围无人观察</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" onclick="closePrivateKeyModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cat Mint Screen -->
+  <div id="cat-mint-screen" class="screen">
+    <button class="back-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <div class="animated-background">
+      <div class="blur-orb orb1"></div>
+      <div class="blur-orb orb2"></div>
+      <div class="blur-orb orb3"></div>
+      <div class="blur-orb orb4"></div>
+      <div class="blur-orb orb5"></div>
+      <div class="blur-orb orb6"></div>
+      <div class="blur-orb orb7"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="geo-shape"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <div class="cat-mint-container">
+      <div class="cat-mint-card">
+        <div class="cat-mint-header">
+          <div class="cat-mint-icon">🐱</div>
+          <h2>嬉皮士<br>快来领取你的赛博小猫</h2>
+          <p>将在Injective上<br>铸造你的第一个赛博猫咪NFT</p>
+        </div>
+
+        <div class="cat-mint-content">
+          <div class="cat-preview" id="cat-preview" style="display: none;">
+            <img src="catdemo.jpg" alt="Cyber Cat" class="cat-image">
+            <div class="cat-mint-success">
+              <h3>铸造成功</h3>
+              <p>每个人只能铸造一次</p>
+            </div>
+          </div>
+
+          <button class="cat-mint-btn" onclick="handleCatMint()" id="cat-mint-btn">
+            <span>铸造赛博小猫</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Powered by Image -->
+    <div class="powered-by-container">
+      <span class="powered-by-text">Powered by</span>
+      <img src="injbg.png" alt="Injective" class="powered-by-image">
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div id="tab-bar" class="tab-bar" style="display: none;">
+    <div class="tab-bar-inner">
+      <div class="tab-item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+          <path d="M14 12a2 2 0 0 1 2 2c0 2.21-.35 6-2 6" />
+          <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+          <path d="M2 12a10 10 0 0 1 18-2" />
+          <path d="M5.5 19a2 2 0 0 0 2 2c1.7 0 3-2 3-4 0-2.21-.85-6-3-6s-3 3.79-3 6c0 .55.13 1.2.33 1.82" />
+          <path d="M9 12a2 2 0 0 0-2-2c-1.33 0-3 2.01-3 5.5a4.5 4.5 0 0 0 4.5 4.5c1.41 0 2.84-.93 3.5-2.02" />
+        </svg>
+        <p data-i18n="tab.pass">Pass</p>
+      </div>
+      <div class="tab-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 1v6m0 6v6" />
+          <path d="M17.66 6.34l-4.24 4.24m0 2.83l4.24 4.24" />
+          <path d="M6.34 6.34l4.24 4.24m0 2.83l-4.24 4.24" />
+        </svg>
+        <p data-i18n="tab.ecosystem">生态</p>
+      </div>
+      <div class="tab-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+          <path d="M12 7v5l4 2" />
+        </svg>
+        <p data-i18n="tab.activity">Activity</p>
+      </div>
+      <div class="tab-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <p data-i18n="tab.settings">Settings</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ------------------ i18n ------------------ */
+    const i18n = {
+      en: {
+        welcome: {
+          title: "Activate your inj Pass",
+          subtitle: "Your exclusive digital identity",
+          badge: "AdventureX 2025 Special Edition",
+          feature1: "1s to get on-chain identity",
+          feature2: "Exclusive unique .inj domain",
+          feature3: "Passwordless secure login",
+          createButton: "Start Creating"
+        },
+        nfc: {
+          scanning: "Scanning...",
+          instruction: "Please bring your AdventureX card close to your phone",
+          status: "Scanning...",
+          skip: "Skip scan"
+        },
+        wallet: {
+          selectTitle: "Select Wallet Connection",
+          selectSubtitle: "Please select a wallet to continue, or skip to scan NFC",
+          adventure25: "Adventure 25'",
+          metamask: "MetaMask",
+          tokenpocket: "Token Pocket",
+          continue: "Continue",
+          skip: "Skip, scan NFC",
+          copyAddress: "Copy Address",
+          viewOnInjScan: "View on InjScan",
+          disconnect: "Disconnect"
+        },
+        scanning: {
+          ready: "Ready to scan...",
+          prompt: "Please bring the NFC item close to your phone...",
+          captured: "Identity core captured!",
+          failed: "Scan failed, please try again."
+        },
+        mint: {
+          title: "Create your .inj domain",
+          subtitle: "This will be your unique identity on Injective.",
+          placeholder: "e.g. Vincent",
+          check: "Check availability",
+          checking: "Checking...",
+          available: "Great! {domain}.inj is available.",
+          taken: "Sorry, {domain}.inj is already taken.",
+          mint: "Mint & activate",
+          generating: "Generating secure wallet...",
+          minting: "Minting your Injective identity...",
+          done: "Done!"
+        },
+        dashboard: {
+          totalAssets: "资产",
+          collection: "收藏品"
+        },
+        tab: {
+          pass: "Pass",
+          ecosystem: "Ecosystem",
+          activity: "Activity",
+          settings: "Settings"
+        }
+      },
+      zh: {
+        welcome: {
+          title: "激活您的inj通行证",
+          subtitle: "你的专属数字身份",
+          badge: "AdventureX 2025 特别款",
+          feature1: "1秒获取链上身份",
+          feature2: "专属唯一.inj域名",
+          feature3: "无密码安全登录",
+          createButton: "开始创建"
+        },
+        nfc: {
+          scanning: "正在扫描",
+          instruction: "请将您的AdventureX卡片靠近手机",
+          status: "正在扫描...",
+          skip: "跳过扫描"
+        },
+        wallet: {
+          selectTitle: "选择钱包连接",
+          selectSubtitle: "请选择一个钱包继续，或跳过直接扫描 NFC",
+          adventure25: "Adventure 25'",
+          metamask: "MetaMask",
+          tokenpocket: "Token Pocket",
+          continue: "继续",
+          skip: "跳过，直接扫描 NFC",
+          copyAddress: "复制地址",
+          viewOnInjScan: "在 InjScan 查看",
+          disconnect: "断开连接"
+        },
+        scanning: {
+          ready: "准备扫描...",
+          prompt: "请将 NFC 物品靠近手机...",
+          captured: "身份核心已捕获！",
+          failed: "扫描失败，请重试。"
+        },
+        mint: {
+          title: "创建您的 .inj 域名",
+          subtitle: "这将成为您在 Injective 上的唯一身份。",
+          placeholder: "例如: Vincent",
+          check: "检查可用性",
+          checking: "检查中...",
+          available: "太棒了！{domain}.inj 可用。",
+          taken: "抱歉，{domain}.inj 已被占用。",
+          mint: "铸造并激活",
+          generating: "正在生成安全钱包...",
+          minting: "正在铸造您的Injective身份...",
+          done: "完成！"
+        },
+        dashboard: {
+          totalAssets: "资产",
+          collection: "收藏品"
+        },
+        tab: {
+          pass: "通行证",
+          ecosystem: "生态",
+          activity: "活动",
+          settings: "设置"
+        }
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'zh';
+    const langToggleBtn = document.getElementById('lang-toggle-btn');
+
+    function t(path) {
+      const parts = path.split('.');
+      let obj = i18n[currentLang];
+      for (const p of parts) {
+        if (obj && p in obj) {
+          obj = obj[p];
+        } else {
+          return path; // fallback: key itself
+        }
+      }
+      return obj;
+    }
+
+    function tf(path, params = {}) {
+      let str = t(path);
+      for (const key in params) {
+        str = str.replace(new RegExp(`{${key}}`, 'g'), params[key]);
+      }
+      return str;
+    }
+
+    function applyI18n() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = t(key);
+        if (typeof val === 'string') el.textContent = val;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        const val = t(key);
+        if (typeof val === 'string') el.placeholder = val;
+      });
+      document.documentElement.lang = currentLang;
+      langToggleBtn.textContent = currentLang === 'en' ? '中' : 'EN';
+    }
+
+    langToggleBtn.addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'zh' : 'en';
+      localStorage.setItem('lang', currentLang);
+      applyI18n();
+      // also update dynamic texts if needed
+      if (appState.currentScreen === 'scanning-screen') {
+        scanningStatusEl.textContent = t('scanning.ready');
+      }
+      checkDomainBtn.textContent = t('mint.check');
+    });
+
+    // Initialize language button text
+    langToggleBtn.textContent = currentLang === 'en' ? '中' : 'EN';
+
+    /* ------------------ Mock API ------------------ */
+    /* --- Device Detection & Passkey Functions --- */
+
+    // 检测是否为iOS设备
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    // 检测是否为Android设备
+    function isAndroid() {
+      return /Android/.test(navigator.userAgent);
+    }
+
+    // Android设备优化
+    function applyAndroidOptimizations() {
+      if (isAndroid()) {
+        // 添加Android特定的CSS类
+        document.body.classList.add('android-device');
+        
+        // 优化动画性能
+        const style = document.createElement('style');
+        style.textContent = `
+          .android-device * {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+          }
+          
+          .android-device .nfc-scan-container,
+          .android-device .ecosystem-card,
+          .android-device .activity-item,
+          .android-device .settings-item {
+            will-change: transform, opacity;
+          }
+          
+          .android-device .animated-background {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+          }
+          
+          .android-device .screen {
+            opacity: 1 !important;
+            transform: none !important;
+            -webkit-transform: none !important;
+          }
+          
+          .android-device .screen.active {
+            opacity: 1 !important;
+            transform: none !important;
+            -webkit-transform: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+
+    // 预加载屏幕内容以减少闪烁
+    function preloadScreenContent(screenId) {
+      const screen = document.getElementById(screenId);
+      if (screen && isAndroid()) {
+        // 强制重绘以减少闪烁
+        screen.style.opacity = '0.99';
+        setTimeout(() => {
+          screen.style.opacity = '1';
+        }, 10);
+      }
+    }
+
+    // 滚动到页面底部
+    function scrollToBottom() {
+      setTimeout(() => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 200);
+    }
+
+    // 检测是否支持Passkey
+    function isPasskeySupported() {
+      return window.PublicKeyCredential &&
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
+        PublicKeyCredential.isConditionalMediationAvailable;
+    }
+
+    // 获取Relying Party ID
+    function getRpId() {
+      const host = window.location.host;
+      // 如果是 localhost 或 IP 地址，返回 localhost
+      if (host.startsWith("localhost") || host.includes("127.0.0.1") || host.includes("192.168.") || host.includes("10.")) {
+        return "localhost";
+      }
+      // 如果是 IP 地址 (简单判断)
+      if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(host)) {
+        return "localhost";
+      }
+      // 其他情况返回实际域名
+      return host;
+    }
+
+    // 创建Passkey
+    async function createPasskey(username) {
+      try {
+        // 检查是否支持Passkey
+        if (!window.PublicKeyCredential) {
+          return { success: false, error: '浏览器不支持Passkey' };
+        }
+
+        // 检查是否支持平台认证器
+        const isAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (!isAvailable) {
+          return { success: false, error: '设备不支持Passkey' };
+        }
+
+        const rpId = getRpId();
+        console.log('Using RP ID:', rpId);
+
+        const publicKey = {
+          challenge: new TextEncoder().encode(crypto.randomUUID()),
+          rp: {
+            id: rpId,
+            name: "Injective Pass",
+          },
+          timeout: 60_000,
+          user: {
+            id: new TextEncoder().encode(crypto.randomUUID()),
+            name: username,
+            displayName: username,
+          },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required"
+          }
+        };
+
+        console.log('Creating passkey with options:', publicKey);
+
+        const pubKeyCredential = await navigator.credentials.create({ publicKey });
+        const { id } = pubKeyCredential;
+        const pubKey = pubKeyCredential.response.getPublicKey();
+
+        // 存储公钥
+        storePublicKey(id, pubKey);
+
+        // 存储用户名映射
+        const publicKeyMap = localStorage.getItem('publicKeyMap') ?
+          JSON.parse(localStorage.getItem('publicKeyMap')) : {};
+        localStorage.setItem('publicKeyMap', JSON.stringify({
+          ...publicKeyMap,
+          [id]: username
+        }));
+
+        console.log('Passkey created successfully:', { id, username });
+        return { success: true, keyId: id, username };
+      } catch (error) {
+        console.error('Passkey creation failed:', error);
+
+        // 提供更友好的错误信息
+        let errorMessage = error.message;
+        if (error.name === 'InvalidStateError') {
+          errorMessage = 'Passkey已存在，请使用现有Passkey登录';
+        } else if (error.name === 'NotAllowedError') {
+          errorMessage = '用户取消了Passkey创建';
+        } else if (error.name === 'SecurityError') {
+          errorMessage = '安全错误，请确保使用HTTPS或localhost';
+        } else if (error.message.includes('invalid domain')) {
+          errorMessage = '域名无效，请确保使用有效的域名或localhost';
+        }
+
+        return { success: false, error: errorMessage };
+      }
+    }
+
+    // 获取Passkey签名
+    async function getPasskeySignature() {
+      try {
+        const publicKey = {
+          challenge: new TextEncoder().encode("Login to Injective Pass"),
+          rpId: getRpId(),
+          timeout: 60_000,
+        };
+
+        const pubKeyCredential = await navigator.credentials.get({
+          publicKey,
+          mediation: "optional",
+        });
+
+        const { id } = pubKeyCredential;
+        const { authenticatorData, clientDataJSON, signature, userHandle } = pubKeyCredential.response;
+        const { challenge, origin } = JSON.parse(formatArrayBuf(clientDataJSON));
+
+        // 获取用户名
+        const publicKeyMap = localStorage.getItem('publicKeyMap') ?
+          JSON.parse(localStorage.getItem('publicKeyMap')) : {};
+        const username = publicKeyMap[id] || 'Unknown User';
+
+        return {
+          success: true,
+          keyId: id,
+          username,
+          challenge,
+          signature: Array.from(new Uint8Array(signature)),
+          authenticatorData: Array.from(new Uint8Array(authenticatorData))
+        };
+      } catch (error) {
+        console.error('Passkey authentication failed:', error);
+        return { success: false, error: error.message };
+      }
+    }
+
+    // 辅助函数
+    function formatArrayBuf(buffer, encoding = "utf-8") {
+      const decoder = new TextDecoder(encoding);
+      return decoder.decode(buffer);
+    }
+
+    function storePublicKey(keyId, arrayBuffer) {
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64String = btoa(String.fromCharCode.apply(null, uint8Array));
+      localStorage.setItem(keyId, base64String);
+    }
+
+    function retrievePublicKey(keyId) {
+      const base64String = localStorage.getItem(keyId);
+      if (!base64String) return null;
+      const uint8Array = new Uint8Array(
+        atob(base64String).split("").map(char => char.charCodeAt(0))
+      );
+      return uint8Array.buffer;
+    }
+
+    // 处理创建Pass的主要逻辑
+    async function handleCreatePass() {
+      if (isIOS() && isPasskeySupported()) {
+        // iOS设备：直接调用Passkey
+        await handleIOSPasskey();
+      } else if (isAndroid()) {
+        // Android设备：显示NFC扫描界面
+        navigateTo('nfc-scan-screen');
+      } else {
+        // 其他设备：显示钱包选择界面
+        navigateTo('wallet-screen');
+      }
+    }
+
+    // iOS Passkey处理
+    async function handleIOSPasskey() {
+      try {
+        // 检查是否已有Passkey
+        const publicKeyMap = localStorage.getItem('publicKeyMap') ?
+          JSON.parse(localStorage.getItem('publicKeyMap')) : {};
+
+        if (Object.keys(publicKeyMap).length > 0) {
+          // 已有Passkey，直接登录
+          const result = await getPasskeySignature();
+          if (result.success) {
+            console.log('Passkey登录成功:', result.username);
+            // 直接跳转到域名创建页面
+            navigateTo('minting-screen');
+          } else {
+            console.error('Passkey登录失败:', result.error);
+            // 如果登录失败，可能是Passkey被删除，跳转到创建页面
+            navigateTo('passkey-create-screen');
+          }
+        } else {
+          // 没有Passkey，跳转到创建页面
+          navigateTo('passkey-create-screen');
+        }
+      } catch (error) {
+        console.error('Passkey处理失败:', error);
+        // 出错时跳转到创建页面
+        navigateTo('passkey-create-screen');
+      }
+    }
+
+    // 处理Passkey创建
+    async function handleCreatePasskey() {
+      const username = document.getElementById('passkey-username').value.trim();
+      const statusEl = document.getElementById('passkey-status');
+      const createBtn = document.querySelector('.passkey-create-btn');
+
+      if (!username) {
+        showPasskeyStatus('请输入用户名', 'error');
+        return;
+      }
+
+      if (username.length < 2) {
+        showPasskeyStatus('用户名至少需要2个字符', 'error');
+        return;
+      }
+
+      try {
+        // 禁用按钮
+        createBtn.disabled = true;
+        createBtn.innerHTML = '<span>创建中...</span>';
+
+        // 创建Passkey
+        const result = await createPasskey(username);
+
+        if (result.success) {
+          showPasskeyStatus('Passkey创建成功！正在跳转...', 'success');
+          console.log('Passkey创建成功:', result.username);
+
+          // 延迟跳转
+          setTimeout(() => {
+            navigateTo('minting-screen');
+          }, 1500);
+        } else {
+          showPasskeyStatus('Passkey创建失败: ' + result.error, 'error');
+          createBtn.disabled = false;
+          createBtn.innerHTML = '<span>创建云托管通行证</span>';
+        }
+      } catch (error) {
+        console.error('Passkey创建失败:', error);
+        showPasskeyStatus('Passkey创建失败，请重试', 'error');
+        createBtn.disabled = false;
+        createBtn.innerHTML = '<span>创建云托管通行证</span>';
+      }
+    }
+
+    // 显示Passkey状态
+    function showPasskeyStatus(message, type) {
+      const statusEl = document.getElementById('passkey-status');
+      statusEl.textContent = message;
+      statusEl.className = `passkey-status ${type}`;
+    }
+
+    // 真实的NFC扫描功能
+    async function startNFCScan() {
+      const statusText = document.getElementById('nfc-status-text');
+
+      try {
+        // 检查是否支持Web NFC API
+        if (!('NDEFReader' in window)) {
+          statusText.textContent = '您的浏览器不支持NFC功能';
+          console.warn('Web NFC API not supported');
+          return;
+        }
+
+        statusText.textContent = '正在初始化NFC...';
+
+        // 创建NDEF读取器
+        const ndef = new NDEFReader();
+
+        // 监听NFC标签读取事件
+        ndef.addEventListener('reading', (event) => {
+          console.log('NFC tag detected:', event);
+
+          // 获取UID
+          const uid = event.serialNumber;
+          appState.nfcUid = uid;
+
+          statusText.textContent = '扫描成功！正在处理...';
+
+          // 延迟跳转到域名创建页面
+          setTimeout(() => {
+            navigateTo('minting-screen');
+          }, 1500);
+        });
+
+        // 监听读取错误
+        ndef.addEventListener('readingerror', (error) => {
+          console.error('NFC reading error:', error);
+          statusText.textContent = '读取失败，请重试';
+        });
+
+        // 开始扫描
+        await ndef.scan();
+        statusText.textContent = '请将NFC卡片靠近手机...';
+
+      } catch (error) {
+        console.error('NFC扫描失败:', error);
+
+        // 提供更友好的错误信息
+        if (error.name === 'NotAllowedError') {
+          statusText.textContent = '需要NFC权限，请允许访问';
+        } else if (error.name === 'NotSupportedError') {
+          statusText.textContent = '设备不支持NFC功能';
+        } else if (error.name === 'NotReadableError') {
+          statusText.textContent = '无法读取NFC卡片';
+        } else {
+          statusText.textContent = '扫描失败，请重试';
+        }
+      }
+    }
+
+    // 兼容性NFC扫描函数（用于不支持Web NFC API的浏览器）
+    async function handleNFCScan() {
+      const statusText = document.getElementById('nfc-status-text');
+
+      try {
+        statusText.textContent = '正在扫描...';
+
+        // 模拟NFC扫描过程
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // 模拟扫描成功
+        statusText.textContent = '扫描成功！正在处理...';
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // 跳转到域名创建页面
+        navigateTo('minting-screen');
+
+      } catch (error) {
+        console.error('NFC扫描失败:', error);
+        statusText.textContent = '扫描失败，请重试';
+      }
+    }
+
+    const mockApi = {
+      readNfcUid: async () => {
+        // 如果已经有NFC UID，直接返回
+        if (appState.nfcUid) {
+          return appState.nfcUid;
+        }
+
+        // 否则返回模拟的UID
+        return new Promise(resolve =>
+          setTimeout(() => resolve(`04:f3:a1:8a:b2:5d:80:${Math.random().toString(16).substr(2, 8)}`), 1500)
+        );
+      },
+      generateWallet: () => ({
+        publicKey: 'inj1' + Math.random().toString(36).substr(2, 38),
+        privateKey: '0x' + Array(64).join().replace(/(.|$)/g, () => (Math.random() * 16 | 0).toString(16)),
+      }),
+      checkDomainAvailability: async (domain) => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return Math.random() > 0.2;
+      },
+      mintNft: async (domain, uid, address) => {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return {
+          name: `${domain}.inj`,
+          imageUrl: `https://placehold.co/400x600/FFFFFF/1F2937?text=${domain}.inj`,
+        };
+      },
+      getBalances: async (address) => ({
+        inj: (Math.random() * 100).toFixed(4),
+        usdt: (Math.random() * 5000).toFixed(2),
+      }),
+    };
+
+    /* ------------------ App State & DOM ------------------ */
+    let appState = {
+      currentScreen: 'welcome-wallet-screen',
+      nfcUid: null,
+      userData: null,
+      wallet: null,
+      navigationHistory: ['welcome-wallet-screen'],
+    };
+
+    const screens = document.querySelectorAll('.screen');
+    const tabBar = document.getElementById('tab-bar');
+
+    // Browser history management
+    function updateBrowserHistory(screenId) {
+      const url = new URL(window.location);
+      url.searchParams.set('screen', screenId);
+      window.history.pushState({ screen: screenId }, '', url);
+    }
+
+    function updatePoweredByVisibility(screenId) {
+      // Hide powered-by for ecosystem, activity, settings screens
+      const hideScreens = ['ecosystem-screen', 'activity-screen', 'settings-screen'];
+      document.querySelectorAll('.powered-by-container').forEach(el => {
+        // Find the closest parent .screen
+        let parentScreen = el.closest('.screen');
+        if (parentScreen && hideScreens.includes(parentScreen.id) && screenId === parentScreen.id) {
+          el.style.display = 'none';
+        } else if (parentScreen && hideScreens.includes(parentScreen.id)) {
+          el.style.display = 'none';
+        } else if (parentScreen && screenId === parentScreen.id) {
+          el.style.display = 'flex';
+        } else {
+          el.style.display = '';
+        }
+      });
+    }
+
+    function navigateTo(screenId) {
+      // Add to navigation history
+      if (screenId !== appState.currentScreen) {
+        appState.navigationHistory.push(screenId);
+      }
+
+      appState.currentScreen = screenId;
+      screens.forEach(screen => {
+        screen.classList.toggle('active', screen.id === screenId);
+      });
+
+      // 显示底部导航栏的条件：dashboard、ecosystem、activity、settings
+      const showTabBarScreens = ['dashboard-screen', 'ecosystem-screen', 'activity-screen', 'settings-screen'];
+      tabBar.style.display = showTabBarScreens.includes(screenId) ? 'block' : 'none';
+
+      // Update powered-by visibility
+      updatePoweredByVisibility(screenId);
+
+      // Update browser history
+      updateBrowserHistory(screenId);
+
+      // Handle screen-specific logic
+      if (screenId === 'nfc-scan-screen') {
+        setTimeout(() => {
+          const container = document.querySelector('.nfc-scan-container');
+          container.classList.add('active');
+          startNFCScan();
+        }, 100);
+      } else if (screenId === 'welcome-wallet-screen') {
+        // Start auto flip animation when welcome screen is shown
+        setTimeout(() => {
+          startWelcomeScreenAnimation();
+          // 自动滚动到页面底部
+          scrollToBottom();
+        }, 100);
+      } else if (screenId === 'dashboard-screen') {
+        // Start auto flip animation when dashboard screen is shown
+        setTimeout(() => {
+          startDashboardCardAnimation();
+        }, 100);
+      } else if (['ecosystem-screen', 'activity-screen', 'settings-screen'].includes(screenId)) {
+        // Android优化：预加载内容以减少闪烁
+        setTimeout(() => {
+          preloadScreenContent(screenId);
+        }, 10);
+      }
+    }
+
+    function goBack() {
+      if (appState.navigationHistory.length > 1) {
+        appState.navigationHistory.pop(); // Remove current screen
+        const previousScreen = appState.navigationHistory[appState.navigationHistory.length - 1];
+        navigateTo(previousScreen);
+      } else {
+        navigateTo('welcome-wallet-screen');
+      }
+    }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', (event) => {
+      const screen = event.state?.screen || 'welcome-wallet-screen';
+      navigateTo(screen);
+    });
+
+    // Initialize browser history
+    updateBrowserHistory('welcome-wallet-screen');
+
+    /* ------------------ Wallet Screen Logic ------------------ */
+    // 钱包选择逻辑优化
+    const walletOptions = document.querySelectorAll('.wallet-option');
+    const walletContinueBtn = document.getElementById('wallet-continue-btn');
+    const walletSkipBtn = document.getElementById('wallet-skip-btn');
+    const adventureSection = document.getElementById('adventure-section');
+    const walletAddressDisplay = document.getElementById('wallet-address-display');
+    const walletDropdown = document.getElementById('wallet-dropdown');
+    const copyAddressDropdown = document.getElementById('copy-address-dropdown');
+    const viewInjscanDropdown = document.getElementById('view-injscan-dropdown');
+    const disconnectDropdown = document.getElementById('disconnect-dropdown');
+
+    // Wallet address display hover functionality
+    let dropdownTimeout;
+
+    walletAddressDisplay.addEventListener('mouseenter', () => {
+      clearTimeout(dropdownTimeout);
+      walletDropdown.style.display = 'block';
+      walletDropdown.style.opacity = '0';
+      setTimeout(() => {
+        walletDropdown.style.opacity = '1';
+      }, 10);
+    });
+
+    walletAddressDisplay.addEventListener('mouseleave', () => {
+      dropdownTimeout = setTimeout(() => {
+        if (!walletDropdown.matches(':hover')) {
+          walletDropdown.style.opacity = '0';
+          setTimeout(() => {
+            walletDropdown.style.display = 'none';
+          }, 200);
+        }
+      }, 150);
+    });
+
+    walletDropdown.addEventListener('mouseenter', () => {
+      clearTimeout(dropdownTimeout);
+    });
+
+    walletDropdown.addEventListener('mouseleave', () => {
+      walletDropdown.style.opacity = '0';
+      setTimeout(() => {
+        walletDropdown.style.display = 'none';
+      }, 200);
+    });
+
+    // Dropdown menu functionality
+    copyAddressDropdown.addEventListener('click', async () => {
+      if (appState.wallet && appState.wallet.address) {
+        try {
+          await navigator.clipboard.writeText(appState.wallet.address);
+          // Show success feedback
+          const originalText = copyAddressDropdown.querySelector('span').textContent;
+          const originalIcon = copyAddressDropdown.querySelector('svg').innerHTML;
+
+          copyAddressDropdown.querySelector('span').textContent = currentLang === 'en' ? 'Copied!' : '已复制!';
+          copyAddressDropdown.querySelector('svg').innerHTML = `
+            <polyline points="20 6 9 17 4 12"/>
+          `;
+          copyAddressDropdown.style.color = 'var(--teal-dark)';
+
+          setTimeout(() => {
+            copyAddressDropdown.querySelector('span').textContent = originalText;
+            copyAddressDropdown.querySelector('svg').innerHTML = originalIcon;
+            copyAddressDropdown.style.color = '';
+          }, 2000);
+        } catch (err) {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = appState.wallet.address;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+
+          // Show feedback
+          const originalText = copyAddressDropdown.querySelector('span').textContent;
+          copyAddressDropdown.querySelector('span').textContent = currentLang === 'en' ? 'Copied!' : '已复制!';
+          setTimeout(() => {
+            copyAddressDropdown.querySelector('span').textContent = originalText;
+          }, 2000);
+        }
+      }
+    });
+
+    viewInjscanDropdown.addEventListener('click', () => {
+      if (appState.wallet && appState.wallet.address) {
+        let address = appState.wallet.address;
+
+        // Convert different address formats to Injective format
+        if (address.startsWith('0x')) {
+          // Convert Ethereum address to Injective address
+          address = 'inj1' + address.slice(2);
+        } else if (!address.startsWith('inj1')) {
+          // If it's not already in Injective format, assume it needs conversion
+          address = 'inj1' + address;
+        }
+
+        // Open InjScan in new tab
+        window.open(`https://injscan.com/account/${address}`, '_blank');
+      }
+    });
+
+    disconnectDropdown.addEventListener('click', () => {
+      // Clear wallet state
+      appState.wallet = null;
+      appState.nfcUid = null;
+      appState.userData = null;
+
+      // Hide wallet address display and dropdown
+      walletAddressDisplay.style.display = 'none';
+      walletDropdown.style.display = 'none';
+      walletDropdown.style.opacity = '0';
+
+      // Reset wallet selection
+      walletOptions.forEach(o => o.classList.remove('selected'));
+      adventureSection.style.display = 'none';
+      walletContinueBtn.disabled = true;
+
+      // Clear any stored wallet data
+      localStorage.removeItem('connectedWallet');
+      localStorage.removeItem('walletAddress');
+
+      // Navigate back to welcome screen
+      navigateTo('welcome-wallet-screen');
+
+      // Show disconnect feedback
+      const originalText = disconnectDropdown.querySelector('span').textContent;
+      disconnectDropdown.querySelector('span').textContent = currentLang === 'en' ? 'Disconnected!' : '已断开!';
+      setTimeout(() => {
+        disconnectDropdown.querySelector('span').textContent = originalText;
+      }, 2000);
+    });
+
+    walletOptions.forEach(option => {
+      option.addEventListener('click', async () => {
+        walletOptions.forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        const walletType = option.dataset.wallet;
+        // 切换钱包时隐藏或清空地址显示
+        walletAddressDisplay.style.display = 'none';
+        walletDropdown.style.display = 'none';
+        walletAddressDisplay.textContent = '';
+        if (walletType === 'adventure25') {
+          adventureSection.style.display = 'block';
+          walletContinueBtn.disabled = false;
+          appState.wallet = 'adventure25';
+        } else {
+          adventureSection.style.display = 'none';
+          // MetaMask/TokenPocket连接逻辑
+          if (walletType === 'metamask') {
+            if (typeof window.ethereum !== 'undefined') {
+              try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (accounts && accounts.length > 0) {
+                  appState.wallet = {
+                    type: 'metamask',
+                    address: accounts[0]
+                  };
+                  // 保存钱包连接状态
+                  localStorage.setItem('connectedWallet', 'metamask');
+                  localStorage.setItem('walletAddress', accounts[0]);
+                  // 显示右上角钱包地址
+                  walletAddressDisplay.style.display = 'block';
+                  walletAddressDisplay.textContent = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
+                  // 直接跳转到minting-screen
+                  navigateTo('minting-screen');
+                }
+              } catch (err) {
+                alert('MetaMask 连接被拒绝或发生错误。');
+                appState.wallet = null;
+                return;
+              }
+            } else {
+              alert('未检测到MetaMask插件，请先安装MetaMask。');
+              appState.wallet = null;
+              return;
+            }
+          } else if (walletType === 'tokenpocket') {
+            // 这里可集成TokenPocket的连接逻辑，暂时直接模拟跳转
+            appState.wallet = { type: 'tokenpocket', address: '0xTokenPocketAddress' };
+            // 保存钱包连接状态
+            localStorage.setItem('connectedWallet', 'tokenpocket');
+            localStorage.setItem('walletAddress', '0xTokenPocketAddress');
+            walletAddressDisplay.style.display = 'block';
+            walletAddressDisplay.textContent = '0xToken...ress';
+            navigateTo('minting-screen');
+          }
+        }
+      });
+    });
+
+    walletContinueBtn.addEventListener('click', () => {
+      if (appState.wallet === 'adventure25') {
+        navigateTo('scanning-screen');
+      }
+    });
+    walletSkipBtn.addEventListener('click', () => {
+      if (appState.wallet === 'adventure25') {
+        navigateTo('scanning-screen');
+      }
+    });
+
+    /* ------------------ Scanning Screen ------------------ */
+    const scanningStatusEl = document.getElementById('scanning-status');
+    const scanningAnimationContainer = document.getElementById('scanning-animation-container');
+
+    async function handleScan() {
+      scanningStatusEl.textContent = t('scanning.prompt');
+      try {
+        const uid = await mockApi.readNfcUid();
+        appState.nfcUid = uid;
+        scanningStatusEl.textContent = t('scanning.captured');
+        scanningAnimationContainer.innerHTML = `
+          <svg class="scanning-icon" style="width: 5rem; height: 5rem; color: var(--teal-dark);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>`;
+        setTimeout(() => navigateTo('minting-screen'), 1000);
+      } catch (error) {
+        scanningStatusEl.textContent = t('scanning.failed');
+        console.error("Scan failed:", error);
+      }
+    }
+
+    /* ------------------ Minting Screen ------------------ */
+    const domainInput = document.getElementById('domain-input');
+    const checkDomainBtn = document.getElementById('check-domain-btn');
+    const mintingFeedbackEl = document.getElementById('minting-feedback');
+    const mintingStepDomain = document.getElementById('minting-step-domain');
+    const mintingStepMinting = document.getElementById('minting-step-minting');
+    const mintingStatusEl = document.getElementById('minting-status');
+
+    domainInput.addEventListener('input', () => {
+      domainInput.value = domainInput.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+      mintingFeedbackEl.innerHTML = '';
+    });
+
+    checkDomainBtn.addEventListener('click', async () => {
+      const domain = domainInput.value;
+      if (!domain) return;
+
+      checkDomainBtn.disabled = true;
+      checkDomainBtn.textContent = t('mint.checking');
+      mintingFeedbackEl.innerHTML = '';
+
+      // 自动添加advx-前缀
+      const fullDomain = 'advx-' + domain;
+      const isAvailable = await mockApi.checkDomainAvailability(fullDomain);
+
+      if (isAvailable) {
+        mintingFeedbackEl.innerHTML = `
+          <button id="mint-btn" class="btn btn-secondary">铸造并激活</button>
+          <p style="font-size: 0.75rem; color: var(--secondary-text); margin-top: 0.5rem;">无需Gas费用</p>
+        `;
+        document.getElementById('mint-btn').addEventListener('click', handleMint);
+      } else {
+        mintingFeedbackEl.innerHTML = `
+          <p class="feedback-error">域名已被注册</p>
+          <button id="mint-btn" class="btn btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">铸造并激活</button>
+        `;
+      }
+
+      checkDomainBtn.disabled = false;
+      checkDomainBtn.textContent = t('mint.check');
+    });
+
+    async function handleMint() {
+      mintingStepDomain.style.display = 'none';
+      mintingStepMinting.style.display = 'block';
+
+      mintingStatusEl.textContent = t('mint.generating');
+      const wallet = mockApi.generateWallet();
+
+      mintingStatusEl.textContent = '正在铸造您的Injective身份...';
+      const fullDomain = 'advx-' + domainInput.value;
+      const nft = await mockApi.mintNft(fullDomain, appState.nfcUid, wallet.publicKey);
+
+      mintingStatusEl.innerHTML = '<span class="emoji-fade-in">完成</span>';
+      appState.userData = { wallet, nft };
+
+      setTimeout(() => {
+        populateDashboard();
+        navigateTo('dashboard-screen');
+      }, 1000);
+    }
+
+    /* ------------------ Dashboard Screen ------------------ */
+    const dashboardNftImage = document.getElementById('dashboard-nft-image');
+    const dashboardNftName = document.getElementById('dashboard-nft-name');
+    const dashboardAddress = document.getElementById('dashboard-address');
+    const dashboardInjBalance = document.getElementById('dashboard-inj-balance');
+    const dashboardUsdtBalance = document.getElementById('dashboard-usdt-balance');
+    const copyAddressBtn = document.getElementById('copy-address-btn');
+    const copyIcon = document.getElementById('copy-icon');
+    const checkIcon = document.getElementById('check-icon');
+
+    async function populateDashboard() {
+      const { wallet, nft } = appState.userData;
+      dashboardNftImage.src = nft.imageUrl;
+      dashboardNftName.textContent = nft.name;
+      dashboardAddress.textContent = `${wallet.publicKey.slice(0, 6)}...${wallet.publicKey.slice(-4)}`;
+
+      const balances = await mockApi.getBalances(wallet.publicKey);
+      dashboardInjBalance.textContent = balances.inj;
+      dashboardUsdtBalance.textContent = balances.usdt;
+
+      // 卡片翻转与二维码
+      const idCard = document.getElementById('dashboard-id-card');
+      const qrcodeDiv = document.getElementById('dashboard-qrcode');
+      const addressBack = document.getElementById('dashboard-address-back');
+      if (idCard && qrcodeDiv && wallet.publicKey) {
+        qrcodeDiv.innerHTML = '';
+        // 根据当前主题设置二维码颜色
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        new QRCode(qrcodeDiv, {
+          text: wallet.publicKey,
+          width: 150,
+          height: 150,
+          colorDark: isDark ? '#FFFFFF' : '#1F2937',
+          colorLight: isDark ? '#1F2937' : '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        addressBack.textContent = wallet.publicKey;
+        idCard.onclick = function () {
+          idCard.classList.toggle('flipped');
+        };
+      }
+    }
+
+    copyAddressBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(appState.userData.wallet.publicKey);
+      copyIcon.style.display = 'none';
+      checkIcon.style.display = 'block';
+      setTimeout(() => {
+        copyIcon.style.display = 'block';
+        checkIcon.style.display = 'none';
+      }, 2000);
+    });
+
+    // Initialize wallet connection state
+    function initializeWalletState() {
+      const savedWallet = localStorage.getItem('connectedWallet');
+      const savedAddress = localStorage.getItem('walletAddress');
+
+      if (savedWallet && savedAddress) {
+        appState.wallet = {
+          type: savedWallet,
+          address: savedAddress
+        };
+        walletAddressDisplay.style.display = 'block';
+        walletAddressDisplay.textContent = savedAddress.slice(0, 6) + '...' + savedAddress.slice(-4);
+
+        // If we have a connected wallet, show it on dashboard
+        if (appState.userData) {
+          navigateTo('dashboard-screen');
+        } else {
+          navigateTo('minting-screen');
+        }
+      }
+    }
+
+    /* ------------------ Theme Management ------------------ */
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const sunIcon = themeToggleBtn.querySelector('.sun-icon');
+    const moonIcon = themeToggleBtn.querySelector('.moon-icon');
+
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      currentTheme = theme;
+      localStorage.setItem('theme', theme);
+
+      if (theme === 'dark') {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      }
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+
+      // 重新生成二维码以适配新主题
+      if (appState.userData && appState.userData.wallet) {
+        const qrcodeDiv = document.getElementById('dashboard-qrcode');
+        if (qrcodeDiv) {
+          qrcodeDiv.innerHTML = '';
+          new QRCode(qrcodeDiv, {
+            text: appState.userData.wallet.publicKey,
+            width: 150,
+            height: 150,
+            colorDark: newTheme === 'dark' ? '#FFFFFF' : '#1F2937',
+            colorLight: newTheme === 'dark' ? '#1F2937' : '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        }
+      }
+    });
+
+    // Initialize theme
+    setTheme(currentTheme);
+
+
+
+    /* ------------------ Tab Bar Navigation ------------------ */
+    const tabItems = document.querySelectorAll('.tab-item');
+
+    tabItems.forEach((item, index) => {
+      item.addEventListener('click', () => {
+        // Remove active class from all tabs
+        tabItems.forEach(tab => tab.classList.remove('active'));
+        // Add active class to clicked tab
+        item.classList.add('active');
+
+        // Navigate to corresponding screen
+        const screens = ['dashboard-screen', 'ecosystem-screen', 'activity-screen', 'settings-screen'];
+        if (screens[index]) {
+          // 添加延迟以减少闪烁
+          setTimeout(() => {
+            navigateTo(screens[index]);
+          }, 50);
+        }
+      });
+    });
+
+    /* ------------------ Settings Interactions ------------------ */
+    const themeToggleSettings = document.getElementById('theme-toggle-settings');
+    const langToggleSettings = document.getElementById('lang-toggle-settings');
+
+    // Initialize settings toggles
+    if (themeToggleSettings) {
+      themeToggleSettings.classList.toggle('active', currentTheme === 'dark');
+      themeToggleSettings.addEventListener('click', () => {
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        themeToggleSettings.classList.toggle('active', newTheme === 'dark');
+      });
+    }
+
+    if (langToggleSettings) {
+      langToggleSettings.textContent = currentLang === 'en' ? 'English' : '中文';
+      langToggleSettings.addEventListener('click', () => {
+        currentLang = currentLang === 'en' ? 'zh' : 'en';
+        localStorage.setItem('lang', currentLang);
+        applyI18n();
+        langToggleSettings.textContent = currentLang === 'en' ? 'English' : '中文';
+      });
+    }
+
+    /* ------------------ Ecosystem Interactions ------------------ */
+    const ecosystemBtns = document.querySelectorAll('.ecosystem-btn');
+    ecosystemBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Button click is handled by onclick attribute
+      });
+    });
+
+    /* ------------------ Settings Action Buttons ------------------ */
+    const settingsActionBtns = document.querySelectorAll('.settings-action-btn');
+    settingsActionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('danger')) {
+          if (confirm('确定要关闭通行证吗？')) {
+            // Disconnect wallet logic
+            appState.wallet = null;
+            localStorage.removeItem('connectedWallet');
+            localStorage.removeItem('walletAddress');
+            navigateTo('welcome-wallet-screen');
+            alert('通行证已关闭');
+          }
+        } else if (btn.textContent.includes('导出')) {
+          alert('数据导出功能即将推出！');
+        } else if (btn.textContent.includes('重置')) {
+          if (confirm('确定要重置所有设置吗？')) {
+            localStorage.clear();
+            location.reload();
+          }
+        }
+      });
+    });
+
+    // Handle cat minting
+    async function handleCatMint() {
+      const mintBtn = document.getElementById('cat-mint-btn');
+      const catPreview = document.getElementById('cat-preview');
+
+      // Disable button to prevent multiple clicks
+      mintBtn.disabled = true;
+      mintBtn.innerHTML = '<span>铸造中...</span>';
+
+      try {
+        // Simulate minting process
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Show success state
+        catPreview.style.display = 'block';
+        mintBtn.style.display = 'none';
+
+        // Store minted state in localStorage to prevent multiple mints
+        localStorage.setItem('catMinted', 'true');
+
+      } catch (error) {
+        console.error('Cat minting failed:', error);
+        mintBtn.disabled = false;
+        mintBtn.innerHTML = '<span>铸造赛博小猫</span>';
+      }
+    }
+
+    // Check if cat has already been minted
+    function checkCatMinted() {
+      const mintBtn = document.getElementById('cat-mint-btn');
+      const catPreview = document.getElementById('cat-preview');
+
+      if (localStorage.getItem('catMinted') === 'true') {
+        catPreview.style.display = 'block';
+        mintBtn.style.display = 'none';
+      }
+    }
+
+    // Show private key modal
+    function showPrivateKeyModal() {
+      const modal = document.getElementById('private-key-modal');
+      modal.style.display = 'flex';
+    }
+
+    // Close private key modal
+    function closePrivateKeyModal() {
+      const modal = document.getElementById('private-key-modal');
+      modal.style.display = 'none';
+    }
+
+    // Toggle dashboard card flip
+    function toggleDashboardCard() {
+      const card = document.getElementById('dashboard-id-card');
+      card.classList.toggle('flipped');
+    }
+
+    // Auto flip dashboard card animation
+    function startDashboardCardAnimation() {
+      const dashboardCard = document.getElementById('dashboard-id-card');
+      if (dashboardCard) {
+        // 延迟1秒后开始翻转
+        setTimeout(() => {
+          dashboardCard.classList.add('flipped');
+          // 1秒后翻转回来
+          setTimeout(() => {
+            dashboardCard.classList.remove('flipped');
+          }, 1000);
+        }, 1000);
+      }
+    }
+
+    // Auto flip card animation - Disabled for welcome screen
+    function startAutoFlipAnimation() {
+      const autoFlipCard = document.getElementById('auto-flip-card');
+      if (autoFlipCard) {
+        // 禁用自动翻转和点击翻转
+        // 延迟1秒后开始翻转
+        // setTimeout(() => {
+        //   autoFlipCard.classList.add('auto-flip');
+        //   // 1秒后翻转回来
+        //   setTimeout(() => {
+        //     autoFlipCard.classList.remove('auto-flip');
+        //   }, 1000);
+        // }, 1000);
+        // 支持点击后立即翻转
+        // autoFlipCard.onclick = function () {
+        //   autoFlipCard.classList.add('auto-flip');
+        //   setTimeout(() => {
+        //     autoFlipCard.classList.remove('auto-flip');
+        //   }, 1000);
+        // };
+      }
+    }
+
+    // Start auto flip animation when welcome screen is shown
+    function startWelcomeScreenAnimation() {
+      const welcomeScreen = document.getElementById('welcome-wallet-screen');
+      if (welcomeScreen && welcomeScreen.classList.contains('active')) {
+        startAutoFlipAnimation();
+      }
+    }
+
+    // init
+    applyI18n();
+    initializeWalletState();
+    applyAndroidOptimizations();
+
+    // Check if cat has been minted
+    checkCatMinted();
+
+    // Handle initial screen from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialScreen = urlParams.get('screen') || 'welcome-wallet-screen';
+    if (initialScreen !== 'welcome-wallet-screen') {
+      navigateTo(initialScreen);
+    } else {
+      // Start auto flip animation when welcome screen is active
+      setTimeout(() => {
+        startWelcomeScreenAnimation();
+        // 首页自动滚动到底部
+        scrollToBottom();
+      }, 100);
+    }
+  </script>
+  
+
+
+
+  
+</body>
+
+</html>

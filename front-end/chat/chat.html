@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博小猫 Chat</title>
+    <link rel="stylesheet" href="../styles.css"> <!-- 复用主样式 -->
+    <link rel="stylesheet" href="chat.css">   <!-- 聊天专属样式 -->
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>与赛博小猫对话 🐾</h1>
+            <p>你的专属链上向导</p>
+        </header>
+        
+        <main class="chat-container">
+            <div id="chat-window" class="chat-window"></div>
+            <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="message-input" placeholder="在这里输入消息..." autocomplete="off">
+                <button id="send-button">发送</button>
+            </div>
+        </main>
+
+        <footer>
+            <p><a href="index.html">返回主页</a></p>
+        </footer>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>

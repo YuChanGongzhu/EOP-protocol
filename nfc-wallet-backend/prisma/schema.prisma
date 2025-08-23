@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户钱包表 - 一个用户一个钱包，一个域名，一张NFC卡片
+model User {
+  id            Int      @id @default(autoincrement())
+  address       String   @unique @db.VarChar(63) // Injective地址 (inj...)
+  ethAddress    String   @unique @db.VarChar(42) // 以太坊格式地址
+  publicKey     String   @unique @db.Text // 公钥 (base64格式)
+  privateKeyEnc String   @db.Text // 加密的私钥
+  domain        String?  @unique @db.VarChar(70) // .inj域名，强制注册且唯一
+  domainTokenId String?  @db.VarChar(100) // 域名NFT代币ID
+  initialFunded Boolean  @default(false) // 是否已进行初始资金发送
+  domainRegistered Boolean @default(false) // 是否已注册域名
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 一个用户只能关联一张NFC卡片（一一对应）
+  nfcCard       NFCCard?
+  
+  // 用户的交易记录
+  transactions  Transaction[]
+  
+  // 用户的小猫NFT
+  catNFTs       CatNFT[]
+
+  @@map("users")
+}
+
+// NFC卡片表 - 一张NFC卡片对应一个用户（一一对应）
+model NFCCard {
+  id        Int      @id @default(autoincrement())
+  uid       String   @unique @db.VarChar(255) // NFC卡片UID
+  userId    Int      @unique // 关联的用户ID（唯一约束确保一一对应）
+  nickname  String?  @db.VarChar(100) // 卡片昵称（可选）
+  isActive  Boolean  @default(true) // 卡片是否激活
+  isBlank   Boolean  @default(true) // 是否为空白卡片
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联到用户（一对一关系）
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("nfc_cards")
+}
+
+// 交易记录表 - 记录所有区块链交易
+model Transaction {
+  id            Int             @id @default(autoincrement())
+  txHash        String          @unique @db.VarChar(66) // 交易哈希
+  userId        Int             // 关联的用户ID
+  type          TransactionType // 交易类型
+  amount        String?         @db.VarChar(50) // 交易金额（字符串格式保存精度）
+  tokenSymbol   String?         @db.VarChar(20) // 代币符号 (INJ, USDT等)
+  fromAddress   String?         @db.VarChar(63) // 发送方地址
+  toAddress     String?         @db.VarChar(63) // 接收方地址
+  status        TxStatus        @default(PENDING) // 交易状态
+  blockHeight   String?         @db.VarChar(20) // 区块高度
+  gasUsed       String?         @db.VarChar(20) // 消耗的gas
+  fee           String?         @db.VarChar(20) // 交易手续费
+  memo          String?         @db.Text // 交易备注
+  rawTx         Json?           // 原始交易数据
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // 关联到用户
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+// 小猫NFT表
+model CatNFT {
+  id          Int      @id @default(autoincrement())
+  tokenId     String   @unique @db.VarChar(100) // NFT代币ID
+  userId      Int      // 关联的用户ID
+  name        String   @db.VarChar(100) // 小猫名称
+  rarity      CatRarity // 稀有度
+  color       String   @db.VarChar(50) // 小猫颜色
+  imageUrl    String   @db.Text // 图片URL
+  metadata    Json?    // 元数据
+  mintedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联到用户
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("cat_nfts")
+}
+
+// 小猫稀有度枚举
+enum CatRarity {
+  R      // 普通 (黑猫)
+  SR     // 稀有 (绿猫、红猫、橘猫)
+  SSR    // 超稀有 (紫猫、蓝猫)
+  UR     // 超超稀有 (彩虹猫)
+}
+
+// 交易类型枚举
+enum TransactionType {
+  SEND
+  RECEIVE
+  INITIAL_FUND
+  DOMAIN_NFT_MINT // Domain NFT minting
+  CAT_NFT_MINT  // Cat NFT minting
+  DOMAIN_REG    // Domain registration (old, now replaced by DOMAIN_NFT_MINT)
+  SWAP
+  STAKE
+  UNSTAKE
+}
+
+// 交易状态枚举
+enum TxStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  CANCELLED
+}
+
+// API密钥表
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(255)
+  name      String   @db.VarChar(100)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("api_keys")
+} 
