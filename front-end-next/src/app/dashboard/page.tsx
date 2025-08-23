@@ -22,11 +22,33 @@ export default function Dashboard() {
   });
   
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('总览');
+  const [publicKey, setPublicKey] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
+  const [showPrivateKeyModal, setShowPrivateKeyModal] = useState(false);
 
   // 生成模拟钱包地址
   const generateMockAddress = (uid: string | null): string => {
     if (!uid) return '0x' + Math.random().toString(36).substring(2, 15);
     return '0x' + uid.replace(/:/g, '').substring(0, 38);
+  };
+
+  // 生成随机公钥和私钥
+  const generateKeys = () => {
+    const chars = '0123456789abcdef';
+    let publicKey = '0x';
+    let privateKey = '0x';
+    
+    for (let i = 0; i < 64; i++) {
+      publicKey += chars[Math.floor(Math.random() * chars.length)];
+    }
+    
+    for (let i = 0; i < 64; i++) {
+      privateKey += chars[Math.floor(Math.random() * chars.length)];
+    }
+    
+    setPublicKey(publicKey);
+    setPrivateKey(privateKey);
   };
 
   useEffect(() => {
@@ -78,6 +100,9 @@ export default function Dashboard() {
         
         // 获取余额数据
         fetchBalances(walletAddress);
+        
+        // 生成随机公钥和私钥
+        generateKeys();
       } catch (error) {
         console.error('加载用户数据失败:', error);
       } finally {
@@ -102,11 +127,32 @@ export default function Dashboard() {
       console.error('获取余额失败:', error);
       // 使用模拟数据
       setBalances({
-        eth: '1',
+        eth: '0',
         usdt: '0',
         xp: '100'
       });
     }
+  };
+
+  // 处理标签切换
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  // 处理铸造
+  const handleMint = () => {
+    console.log('铸造ETH CATS');
+    // 这里可以添加铸造逻辑
+  };
+
+  // 处理导出私钥
+  const handleExportPrivateKey = () => {
+    setShowPrivateKeyModal(true);
+  };
+
+  // 关闭私钥弹窗
+  const closePrivateKeyModal = () => {
+    setShowPrivateKeyModal(false);
   };
 
   // 如果正在加载或没有用户数据，显示加载状态
@@ -140,7 +186,7 @@ export default function Dashboard() {
                 </svg>
               </div>
               <div className="wallet-details">
-                <span className="wallet-name">通行密钥钱包</span>
+                <span className="wallet-name">您的地址</span>
                 <div className="wallet-address">
                   <span className="address-text">{userData.walletAddress.substring(0, 6)}...{userData.walletAddress.substring(userData.walletAddress.length - 4)}</span>
                   <button className="copy-btn">
@@ -158,78 +204,152 @@ export default function Dashboard() {
           <div className="main-balance">
             <div className="balance-amount">¥{balances.usdt}</div>
             <div className="balance-change">
-              +¥{parseFloat(balances.usdt) * 0.1} (+{Math.floor(Math.random() * 100 + 200)}%) 1月
+              +¥{parseFloat(balances.usdt) * 0.1} (+N/A) 1月
             </div>
           </div>
         </div>
         
         {/* 资产分类标签 */}
         <div className="asset-tabs">
-          <button className="tab-btn active">币种</button>
-          <button className="tab-btn">DeFi</button>
-          <button className="tab-btn">NFT</button>
-          <button className="tab-btn">授权</button>
+          <button 
+            className={`tab-btn ${activeTab === '总览' ? 'active' : ''}`}
+            onClick={() => handleTabChange('总览')}
+          >
+            总览
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === '生态' ? 'active' : ''}`}
+            onClick={() => handleTabChange('生态')}
+          >
+            生态
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === '设置' ? 'active' : ''}`}
+            onClick={() => handleTabChange('设置')}
+          >
+            设置
+          </button>
         </div>
         
-        {/* 资产列表 */}
-        <div className="asset-list">
-          <div className="asset-header">
-            <span className="asset-title">资产总值</span>
-            <span className="asset-total">¥{balances.usdt}</span>
-            <button className="sort-btn">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-          
-          <div className="asset-items">
-            <div className="asset-item">
-              <div className="asset-icon eth">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        {/* 内容区域 */}
+        {activeTab === '总览' && (
+          <div className="asset-list">
+            <div className="asset-header">
+              <span className="asset-title">资产总值</span>
+              <button className="sort-btn">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-              </div>
-              <div className="asset-info">
-                <span className="asset-name">Holesky ETH</span>
-                <span className="asset-price">¥0</span>
-              </div>
-              <div className="asset-balance">
-                <span className="balance-amount">1</span>
-                <span className="balance-value">¥0</span>
+              </button>
+            </div>
+            
+            <div className="asset-items">
+              <div className="asset-item">
+                <div className="asset-icon eth">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+                <div className="asset-info">
+                  <span className="asset-name">Holesky ETH</span>
+                  <span className="asset-price">¥0</span>
+                </div>
+                <div className="asset-balance">
+                  <span className="balance-amount">0</span>
+                  <span className="balance-value">¥0</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      {/* 底部导航栏 */}
-      <div className="bottom-nav">
-        <button className="nav-btn">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span>首页</span>
-        </button>
-        <button className="nav-btn">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <span>发现</span>
-        </button>
-        <button className="nav-btn active">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>设置</span>
-        </button>
+        )}
+        
+        {activeTab === '生态' && (
+          <div className="ecosystem-list">
+            <div className="ecosystem-header">
+              <span className="ecosystem-title">生态项目</span>
+            </div>
+            
+            <div className="ecosystem-items">
+              <div className="ecosystem-item">
+                <div className="ecosystem-icon">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+                <div className="ecosystem-info">
+                  <span className="ecosystem-name">ETH CATS</span>
+                  <span className="ecosystem-desc">以太坊猫咪NFT系列</span>
+                </div>
+                <button className="mint-btn" onClick={handleMint}>
+                  铸造
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {activeTab === '设置' && (
+          <div className="settings-list">
+            <div className="settings-header">
+              <span className="settings-title">设置</span>
+            </div>
+            
+            <div className="settings-items">
+              <div className="settings-item">
+                <div className="settings-icon">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </div>
+                <div className="settings-info">
+                  <span className="settings-name">私钥</span>
+                  <span className="settings-desc">管理您的私钥</span>
+                </div>
+                <button className="export-btn" onClick={handleExportPrivateKey}>
+                  导出
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Powered by */}
       <div className="powered-by-container">
-        <span className="powered-by-text">ETH SZ 黑客松伙伴</span>
+        <span className="powered-by-text">ETH SZ Hackathon Preview</span>
       </div>
+
+      {/* 私钥弹窗 */}
+      {showPrivateKeyModal && (
+        <div className="private-key-modal-overlay" onClick={closePrivateKeyModal}>
+          <div className="private-key-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="private-key-modal-header">
+              <h3 className="private-key-modal-title">私钥信息</h3>
+              <button className="private-key-modal-close-btn" onClick={closePrivateKeyModal}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="private-key-modal-body">
+              <div className="private-key-info">
+                <h4 className="private-key-label">您的私钥：</h4>
+                <div className="private-key-value">{privateKey}</div>
+                <p className="private-key-warning">
+                  ⚠️ 请妥善保管，不要泄露给他人！私钥是您资产的唯一凭证。
+                </p>
+              </div>
+            </div>
+            
+            <div className="private-key-modal-footer">
+              <button className="private-key-modal-close-button" onClick={closePrivateKeyModal}>
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
