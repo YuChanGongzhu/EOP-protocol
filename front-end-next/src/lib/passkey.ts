@@ -47,7 +47,7 @@ export async function createPasskey(username: string): Promise<PasskeyResult> {
       challenge: new TextEncoder().encode(crypto.randomUUID()),
       rp: {
         id: rpId,
-        name: "Injective Pass",
+        name: "Egoda Pass",
       },
       timeout: 60_000,
       user: {
@@ -55,7 +55,11 @@ export async function createPasskey(username: string): Promise<PasskeyResult> {
         name: username,
         displayName: username,
       },
-      pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+      // 同时包含 ES256(-7) 与 RS256(-257)，提升兼容性
+      pubKeyCredParams: [
+        { type: "public-key", alg: -7 },
+        { type: "public-key", alg: -257 },
+      ],
       authenticatorSelection: {
         authenticatorAttachment: "platform",
         userVerification: "required"

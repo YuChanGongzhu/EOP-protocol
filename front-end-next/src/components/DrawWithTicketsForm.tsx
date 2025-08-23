@@ -14,8 +14,15 @@ export default function DrawWithTicketsForm({ onDrawn }: { onDrawn?: (cat: CatNF
         setError(null);
         setLoading(true);
         try {
-            const res = await NfcApi.drawWithTickets({ nfcUid, catName });
-            onDrawn?.(res as CatNFT);
+            await NfcApi.drawWithTickets({ nfcUid, catName });
+            onDrawn?.({
+              tokenId: '0',
+              name: catName,
+              rarity: 'R',
+              color: 'black',
+              imageUrl: '',
+              mintedAt: new Date().toISOString(),
+            } as CatNFT);
         } catch (err: any) {
             setError(err?.message || '抽卡失败');
         } finally {
