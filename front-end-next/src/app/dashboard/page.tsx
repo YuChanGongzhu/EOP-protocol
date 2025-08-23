@@ -36,10 +36,12 @@ export default function Dashboard() {
         const storedDomain = localStorage.getItem('userDomain');
         const storedNfcUid = localStorage.getItem('nfcUid');
         
+        // 使用存储的域名或默认域名
+        const userDomain = storedDomain || 'user.egoda';
+        
         if (!storedDomain) {
-          console.log('未找到用户域名，重定向到铸造页面');
-          router.push('/minting');
-          return;
+          console.log('未找到用户域名，使用默认值');
+          // 不再重定向到minting页面，直接在dashboard中处理
         }
         
         // 获取或生成钱包地址
@@ -66,10 +68,10 @@ export default function Dashboard() {
         
         // 生成NFT图像URL
         const imageUrl = localStorage.getItem('nftImageUrl') || 
-          `https://placehold.co/400x600/FFFFFF/1F2937?text=${storedDomain}`;
+          `https://placehold.co/400x600/FFFFFF/1F2937?text=${userDomain}`;
         
         setUserData({
-          domain: storedDomain,
+          domain: userDomain,
           imageUrl: imageUrl,
           walletAddress: walletAddress
         });
