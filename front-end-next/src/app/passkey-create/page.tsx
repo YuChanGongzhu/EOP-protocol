@@ -34,7 +34,7 @@ export default function PasskeyCreatePage() {
         setStatus('success');
         // 延迟跳转到铸造页面
         setTimeout(() => {
-          router.push('/minting');
+          router.push('/dashboard');
         }, 2000);
       } else {
         setStatus('error');

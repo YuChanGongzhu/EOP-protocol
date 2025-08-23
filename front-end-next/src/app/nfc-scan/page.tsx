@@ -18,7 +18,7 @@ export default function NfcScanPage() {
 
   // 处理跳过按钮
   const handleSkip = () => {
-    router.push('/minting');
+    router.push('/dashboard');
   };
 
   // 处理手动输入模式
@@ -31,7 +31,7 @@ export default function NfcScanPage() {
     console.log('NFC注册成功:', res);
     // 延迟跳转到铸造页面
     setTimeout(() => {
-      router.push('/minting');
+      router.push('/dashboard');
     }, 1500);
   };
 
@@ -65,7 +65,7 @@ export default function NfcScanPage() {
             
             // 延迟跳转到铸造页面
             timeoutId = setTimeout(() => {
-              router.push('/minting');
+              router.push('/dashboard');
             }, 1500);
           });
           
