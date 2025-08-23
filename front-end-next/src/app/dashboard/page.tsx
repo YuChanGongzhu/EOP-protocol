@@ -26,6 +26,9 @@ export default function Dashboard() {
   const [publicKey, setPublicKey] = useState('');
   const [privateKey, setPrivateKey] = useState('');
   const [showPrivateKeyModal, setShowPrivateKeyModal] = useState(false);
+  const [mintedNFT, setMintedNFT] = useState<any>(null);
+  const [isMinting, setIsMinting] = useState(false);
+  const [showMintedNFTModal, setShowMintedNFTModal] = useState(false);
 
   // 生成模拟钱包地址
   const generateMockAddress = (uid: string | null): string => {
@@ -49,6 +52,36 @@ export default function Dashboard() {
     
     setPublicKey(publicKey);
     setPrivateKey(privateKey);
+  };
+
+  // Cat NFT mock data with probabilities
+  const catNFTs = [
+    { name: 'normal', image: 'normal.png', probability: 40 }, // 40%
+    { name: 'purple-eth', image: 'purple-eth.png', probability: 12 }, // 12%
+    { name: 'grey-eth', image: 'grey-eth.png', probability: 12 }, // 12%
+    { name: 'purple-milk', image: 'purple-milk.png', probability: 15 }, // 15%
+    { name: 'plane', image: 'plane.png', probability: 8 }, // 8%
+    { name: 'multi-eth', image: 'multi-eth.png', probability: 5 }, // 5%
+    { name: 'tiger', image: 'tiger.png', probability: 4 }, // 4%
+    { name: 'round-eth', image: 'round-eth.png', probability: 2 }, // 2%
+    { name: 'black-eth', image: 'black-eth.png', probability: 1.5 }, // 1.5%
+    { name: 'money-eth', image: 'money-eth.png', probability: 0.5 } // 0.5% (最稀有)
+  ];
+
+  // 根据概率随机选择NFT
+  const selectRandomNFT = () => {
+    const random = Math.random() * 100;
+    let cumulativeProbability = 0;
+    
+    for (const nft of catNFTs) {
+      cumulativeProbability += nft.probability;
+      if (random <= cumulativeProbability) {
+        return nft;
+      }
+    }
+    
+    // 如果没有匹配到，返回normal（最常见的）
+    return catNFTs[0];
   };
 
   useEffect(() => {
@@ -112,7 +145,7 @@ export default function Dashboard() {
     
     loadUserData();
   }, [router]);
-  
+
   // 获取余额数据
   const fetchBalances = async (address: string) => {
     try {
@@ -141,8 +174,36 @@ export default function Dashboard() {
 
   // 处理铸造
   const handleMint = () => {
-    console.log('铸造ETH CATS');
-    // 这里可以添加铸造逻辑
+    // 检查是否已经铸造过
+    const existingNFT = localStorage.getItem('mintedCatNFT');
+    if (existingNFT) {
+      const nftData = JSON.parse(existingNFT);
+      setMintedNFT(nftData);
+      setShowMintedNFTModal(true);
+      return;
+    }
+
+    setIsMinting(true);
+    console.log('开始铸造ETH CATS...');
+    
+    // 1秒延时后铸造
+    setTimeout(() => {
+      const selectedNFT = selectRandomNFT();
+      const mintedData = {
+        ...selectedNFT,
+        mintedAt: new Date().toISOString(),
+        tokenId: Math.floor(Math.random() * 10000) + 1
+      };
+      
+      // 保存到本地存储
+      localStorage.setItem('mintedCatNFT', JSON.stringify(mintedData));
+      
+      setMintedNFT(mintedData);
+      setIsMinting(false);
+      setShowMintedNFTModal(true);
+      
+      console.log('铸造成功！', mintedData);
+    }, 1000);
   };
 
   // 处理导出私钥
@@ -154,6 +215,19 @@ export default function Dashboard() {
   const closePrivateKeyModal = () => {
     setShowPrivateKeyModal(false);
   };
+
+  // 关闭NFT展示弹窗
+  const closeMintedNFTModal = () => {
+    setShowMintedNFTModal(false);
+  };
+
+  // 检查是否已经铸造过NFT
+  useEffect(() => {
+    const existingNFT = localStorage.getItem('mintedCatNFT');
+    if (existingNFT) {
+      setMintedNFT(JSON.parse(existingNFT));
+    }
+  }, []);
 
   // 如果正在加载或没有用户数据，显示加载状态
   if (loading) {
@@ -280,8 +354,8 @@ export default function Dashboard() {
                   <span className="ecosystem-name">ETH CATS</span>
                   <span className="ecosystem-desc">以太坊猫咪NFT系列</span>
                 </div>
-                <button className="mint-btn" onClick={handleMint}>
-                  铸造
+                <button className="mint-btn" onClick={handleMint} disabled={isMinting}>
+                  {isMinting ? '铸造中...' : (mintedNFT ? '查看NFT' : '铸造')}
                 </button>
               </div>
             </div>
@@ -344,6 +418,52 @@ export default function Dashboard() {
             
             <div className="private-key-modal-footer">
               <button className="private-key-modal-close-button" onClick={closePrivateKeyModal}>
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 铸造的NFT展示弹窗 */}
+      {showMintedNFTModal && mintedNFT && (
+        <div className="nft-modal-overlay" onClick={closeMintedNFTModal}>
+          <div className="nft-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="nft-modal-header">
+              <h3 className="nft-modal-title">恭喜！您获得了稀有猫咪NFT</h3>
+              <button className="nft-modal-close-btn" onClick={closeMintedNFTModal}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="nft-modal-body">
+              <div className="nft-card">
+                <div className="nft-image-container">
+                  <img 
+                    src={`/images/${mintedNFT.image}`} 
+                    alt={mintedNFT.name}
+                    className="nft-image"
+                    onError={(e) => {
+                      // 如果图片加载失败，显示占位符
+                      e.currentTarget.src = `https://placehold.co/300x300/FFFFFF/1F2937?text=${mintedNFT.name}`;
+                    }}
+                  />
+                </div>
+                <div className="nft-info">
+                  <h4 className="nft-name">{mintedNFT.name}</h4>
+                  <p className="nft-rarity">稀有度: {mintedNFT.probability}%</p>
+                  <p className="nft-token-id">Token ID: #{mintedNFT.tokenId}</p>
+                  <p className="nft-minted-date">
+                    铸造时间: {new Date(mintedNFT.mintedAt).toLocaleString('zh-CN')}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="nft-modal-footer">
+              <button className="nft-modal-close-button" onClick={closeMintedNFTModal}>
                 关闭
               </button>
             </div>
