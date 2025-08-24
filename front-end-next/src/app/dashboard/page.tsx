@@ -320,7 +320,7 @@ export default function Dashboard() {
                   </svg>
                 </div>
                 <div className="asset-info">
-                  <span className="asset-name">Holesky ETH</span>
+                  <span className="asset-name">Sepolia ETH</span>
                   <span className="asset-price">¥0</span>
                 </div>
                 <div className="asset-balance">
